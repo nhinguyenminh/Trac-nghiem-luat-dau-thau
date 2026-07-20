@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { useStats } from "../useStats"
+import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
 import type { Question } from "../types"
 
 const LETTERS = ["A", "B", "C", "D"]
-const AUTO_NEXT_MS = 2000
+const AUTO_NEXT_MS = 3000
 const ATTEMPTS_KEY = "quiz-attempts-v1"
 
 interface Attempt {
@@ -54,6 +55,7 @@ function readStoredAttempts(): StoredAttempt[] {
 
 export default function QuizPage() {
   const { stats, accuracy, record, reset } = useStats()
+  const { settings, toggle } = useSettings()
 
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
@@ -141,7 +143,9 @@ export default function QuizPage() {
     const correct = index === current.answer
     record(correct)
     setHistory((prev) => [...prev, { question: current, selected: index }])
-    timerRef.current = setTimeout(goNext, AUTO_NEXT_MS)
+    if (settings.autoNext) {
+      timerRef.current = setTimeout(goNext, AUTO_NEXT_MS)
+    }
   }
 
   const openReview = (i: number) => {
@@ -192,7 +196,29 @@ export default function QuizPage() {
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <span className="text-sm font-semibold text-slate-800">Cài đặt</span>
+            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={settings.autoNext}
+                onChange={() => toggle("autoNext")}
+                className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
+              />
+              Tự động chuyển câu sau 3 giây
+            </label>
+            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={settings.showNextButton}
+                onChange={() => toggle("showNextButton")}
+                className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
+              />
+              Hiển thị nút chuyển câu
+            </label>
+          </div>
+
           <div className="mb-4 flex items-center justify-between">
             <span
               className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -274,7 +300,26 @@ export default function QuizPage() {
               <span className="font-semibold text-ms-green">
                 {LETTERS[shownQuestion.answer]}. {shownQuestion.options[shownQuestion.answer]}
               </span>
-              {!reviewing && <span className="ml-1 text-slate-400">· Tự động chuyển câu sau 2 giây...</span>}
+              {!reviewing && (
+                <span className="ml-1 text-slate-400">
+                  {settings.autoNext
+                    ? "· Tự động chuyển câu sau 3 giây..."
+                    : settings.showNextButton
+                      ? "· Bấm nút chuyển câu để tiếp tục."
+                      : "· Bạn có thể tiếp tục khi sẵn sàng."}
+                </span>
+              )}
+            </div>
+          )}
+
+          {!reviewing && shownLocked && settings.showNextButton && (
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={goNext}
+                className="inline-flex items-center gap-2 rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ms-blue-dark"
+              >
+                <Play className="h-4 w-4" /> Câu tiếp theo
+              </button>
             </div>
           )}
 
