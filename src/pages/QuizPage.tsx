@@ -19,17 +19,25 @@ interface StoredAttempt {
   question?: Question
 }
 
+function normalizeText(value: string): string {
+  return String(value ?? "")
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .trim()
+}
+
 function shouldShuffleOptions(question: Question): boolean {
-  const answerText = String(question.options[question.answer] ?? "")
-  const questionText = String(question.question ?? "")
-  const haystack = `${answerText} ${questionText}`.toLowerCase().trim()
+  const answerText = normalizeText(question.options[question.answer] ?? "")
+  const questionText = normalizeText(question.question ?? "")
+  const haystack = `${answerText} ${questionText}`
 
   const shouldKeepOriginalOrder =
-    /đều (đúng|sai)/.test(haystack) ||
-    /là (đúng|sai)/.test(haystack) ||
-    /tất cả (các )?phương án/.test(haystack) ||
-    /mọi phương án/.test(haystack) ||
-    /phương án trên/.test(haystack)
+    /đều\s+(đúng|sai)/.test(haystack) ||
+    /là\s+(đúng|sai)/.test(haystack) ||
+    /tất\s+cả\s+(các\s+)?phương\s+án/.test(haystack) ||
+    /mọi\s+phương\s+án/.test(haystack) ||
+    /phương\s+án\s+trên/.test(haystack) ||
+    /cả\s+\d+\s+phương\s+án/.test(haystack)
 
   return !shouldKeepOriginalOrder
 }

@@ -161,8 +161,7 @@
       "Gói thầu mua sắm hàng hóa mà hàng hóa đó trong nước sản xuất được và đáp ứng các yêu cầu về kỹ thuật, chất lượng, giá nhưng chủ đầu tư yêu cầu phải mua hàng hóa nhập khẩu",
       "Gói thầu mua sắm hàng hóa mà hàng hóa đó trong nước không sản xuất được hoặc sản xuất",
       "được nhưng không đáp ứng một trong các yêu cầu về kỹ thuật, chất lượng, giá",
-      "Gói thầu mua sắm hàng hóa thông dụng đã được nhập khẩu và chào bán tại Việt Nam nhưng",
-      "hàng hóa đó trong nước không sản xuất được"
+      "Gói thầu mua sắm hàng hóa thông dụng đã được nhập khẩu và chào bán tại Việt Nam nhưn hàng hóa đó trong nước không sản xuất được"
     ],
     "answer": 2
   },
@@ -306,8 +305,7 @@
       "Công ty B sử dụng nhà thầu phụ là công ty A, công ty A là nhà thầu tư vấn lập Chương V yêu cầu kỹ thuật cho E-HSMT của gói thầu xây lắp X",
       "Công ty B tham dự gói thầu xây lắp X đồng thời là nhà thầu tư vấn lập Chương V yêu cầu kỹ thuật của E-HSMT của gói thầu xây lắp X.",
       "Công ty B sử dụng nhà thầu phụ là công ty tư vấn C, công ty tư vấn C sở hữu 30% cổ phần của công ty A và công ty A là nhà thầu tư vấn thiết kế kỹ thuật cho dự án Y",
-      "Công ty A là nhà thầu tư vấn lập hồ sơ mời thầu gói thầu xây lắp X có sở hữu 30% vốn góp của",
-      "ng ty B"
+      "Công ty A là nhà thầu tư vấn lập hồ sơ mời thầu gói thầu xây lắp X có sở hữu 30% vốn góp của Công ty B"
     ],
     "answer": 2
   },
@@ -426,8 +424,7 @@
     "question": "Phương án nào không phải là điều kiện để được áp dụng hình thức mua sắm trực tiếp?",
     "options": [
       "Nhà thầu đã trúng thầu thông qua đấu thầu rộng rãi, đấu thầu hạn chế và đã ký hợp đồng gói thầu thực hiện gói thầu trước đó",
-      "Thời gian từ khi ký hợp đồng gói thầu trước đến ngày phê duyệt kết quả mua sắm trực tiếp không",
-      "quá 12 tháng",
+      "Thời gian từ khi ký hợp đồng gói thầu trước đến ngày phê duyệt kết quả mua sắm trực tiếp không quá 12 tháng",
       "Đơn giá các phần việc thuộc gói thầu mua sắm trực tiếp không vượt đơn giá phần việc tương ứng của gói thầu đã ký trước đó thuộc gói thầu tương tự đã ký hợp đồng trước đó, đồng thời, phù hợp với giá thị trường tại thời điểm hoàn thiện hợp đồng",
       "Chủ đầu tư được áp dụng mua sắm trực tiếp nhiều lần đối với các loại hàng hóa thuộc gói thầu"
     ],
@@ -880,8 +877,7 @@
     "options": [
       "Chủ đầu tư phải ghi tỷ lệ % giá trị dành cho nhà thầu phụ trong E-BDL làm cơ sở để nhà thầu lập E-HSDT",
       "Năng lực và kinh nghiệm của nhà thầu phụ sẽ không được xem xét khi đánh giá E-HSDT của nhà thầu",
-      "Nhà thầu được ký kết hợp đồng với các nhà thầu phụ trong danh sách các nhà thầu phụ nêu trong",
-      "E-HSDT",
+      "Nhà thầu được ký kết hợp đồng với các nhà thầu phụ trong danh sách các nhà thầu phụ nêu trong E-HSDT",
       "Nhà thầu được ký kết hợp đồng với các nhà thầu phụ được chủ đầu tư chấp thuận để tham gia thực hiện cung cấp dịch vụ liên quan"
     ],
     "answer": 0
@@ -1069,8 +1065,7 @@
       "Chủ đầu tư yêu cầu nhà thầu làm rõ các thông tin này để làm cơ sở đánh giá trên cơ sở không được thay đổi giá dự thầu",
       "Tổ chuyên gia căn cứ theo cataloge, đề xuất kỹ thuật kèm theo để làm cơ sở đánh giá",
       "Hồ sơ dự thầu của nhà thầu không được xem xét, đánh giá",
-      "Tiếp tục đánh giá hồ sơ dự thầu, trường hơp nhà thầu trúng thầu thì yêu cầu nhà thầu bổ sung, làm",
-      "rõ các thông tin này"
+      "Tiếp tục đánh giá hồ sơ dự thầu, trường hơp nhà thầu trúng thầu thì yêu cầu nhà thầu bổ sung, làm rõ các thông tin này"
     ],
     "answer": 2
   },
@@ -1100,8 +1095,7 @@
     "id": 100,
     "question": "Đối với đấu thầu qua mạng, nhà thầu đã nộp E-HSDT nhưng sau đó E-HSMT của gói thầu này sửa đổi thì nhà thầu cần thực hiện theo phương án nào sau đây?",
     "options": [
-      "Phải tiến hành rút toàn bộ E-HSDT đã nộp trước đó để sửa đổi cho phù hợp và tiến hành nộp lại",
-      "E-HSDT mới",
+      "Phải tiến hành rút toàn bộ E-HSDT đã nộp trước đó để sửa đổi cho phù hợp và tiến hành nộp lại E-HSDT mới",
       "Không phải tiến hành rút toàn bộ E-HSDT đã nộp trước đó, chỉ cần sửa đổi cho phù hợp và tiến hành nộp lại E-HSDT mới",
       "Sửa đổi cho phù hợp E-HSDT đã nộp mà không phải nộp lại E- HSDT mới",
       "Các phương án trên đều sai"
@@ -1368,8 +1362,7 @@
       "Được đăng tải trên Hệ thống mạng đấu thầu quốc gia trong thời hạn 24 giờ kể từ thời điểm mở thầu",
       "Được đăng tải trên Hệ thống mạng đấu thầu quốc gia trong thời hạn 02 giờ kể từ thời điểm mở thầu",
       "Được đăng tải trên Hệ thống mạng đấu thầu quốc gia trong thời hạn 04 giờ kể từ thời điểm mở thầu",
-      "Được đăng tải trên Hệ thống mạng đấu thầu quốc gia trong thời hạn 03 ngày làm việc kể từ thời",
-      "điểm mở thầu"
+      "Được đăng tải trên Hệ thống mạng đấu thầu quốc gia trong thời hạn 03 ngày làm việc kể từ thời điểm mở thầu"
     ],
     "answer": 0
   },
@@ -1391,8 +1384,7 @@
       "Khi có sự thay đổi về chính sách, pháp luật làm ảnh hưởng trực tiếp đến việc thực hiện hợp đồng",
       "Khi có sự kiện bất khả kháng",
       "Khi thay đổi phương thức vận chuyển, địa điểm giao hàng, dịch vụ liên quan đối với gói thầu mua sắm hàng hóa",
-      "Tăng, giảm thời gian đối với hợp đồng theo thời gian; tăng, giảm chi phí trực tiếp thực hiện đối với hợp đồng chi phí cộng phí; tăng, giảm giá trị cơ sở để tính phần trăm chi phí đối với hợp đồng theo tỷ lệ phần trăm; tăng, giảm mức giảm trừ thanh toán, mức tăng giá trị thanh toán đối với hợp",
-      "đồng theo kết quả đầu ra"
+      "Tăng, giảm thời gian đối với hợp đồng theo thời gian; tăng, giảm chi phí trực tiếp thực hiện đối với hợp đồng chi phí cộng phí; tăng, giảm giá trị cơ sở để tính phần trăm chi phí đối với hợp đồng theo tỷ lệ phần trăm; tăng, giảm mức giảm trừ thanh toán, mức tăng giá trị thanh toán đối với hợp đồng theo kết quả đầu ra"
     ],
     "answer": 3
   },
@@ -2144,8 +2136,7 @@
       "Chủ đầu tư quyết định xử lý tình huống sau khi có ý kiến của người có thẩm quyền",
       "Người có thẩm quyền quyết định xử lý tình huống sau khi có ý kiến của Tổ chuyên gia",
       "Người có thẩm quyền quyết định xử lý tình huống sau khi có ý kiến của chủ đầu tư",
-      "Người có thẩm quyền quyết định xử lý tình huống sau khi có ý kiến của chủ đầu tư và Tổ chuyên",
-      "gia"
+      "Người có thẩm quyền quyết định xử lý tình huống sau khi có ý kiến của chủ đầu tư và Tổ chuyên gia"
     ],
     "answer": 0
   },
@@ -2156,8 +2147,7 @@
       "Nhà thầu liên danh vi phạm hợp đồng bị coi là không hoàn thành hợp đồng và bị chủ đầu tư đăng tải thông tin nhà thầu liên danh vi phạm hợp đồng trên Hệ thống mạng đấu thầu quốc gia",
       "Chỉ một hoặc một số thành viên liên danh vi phạm hợp đồng bị coi là không hoàn thành hợp đồng và bị chủ đầu tư đăng tải thông tin thành viên liên danh vi phạm hợp đồng trên Hệ thống mạng đấu thầu quốc gia",
       "Chỉ một hoặc một số thành viên liên danh vi phạm hợp đồng bị coi là không hoàn thành hợp đồng và bị bên mời thầu đăng tải thông tin thành viên liên danh vi phạm hợp đồng trên Hệ thống mạng đấu thầu quốc gia",
-      "Nhà thầu liên danh vi phạm hợp đồng bị coi là không hoàn thành hợp đồng và bị bên mời thầu",
-      "đăng tải thông tin nhà thầu liên danh vi phạm hợp đồng trên Hệ thống mạng đấu thầu quốc gia"
+      "Nhà thầu liên danh vi phạm hợp đồng bị coi là không hoàn thành hợp đồng và bị bên mời thầu đăng tải thông tin nhà thầu liên danh vi phạm hợp đồng trên Hệ thống mạng đấu thầu quốc gia"
     ],
     "answer": 1
   },
@@ -2168,8 +2158,7 @@
       "Bằng giá trị ghi trong hợp đồng trừ đi giá trị của phần công việc đã thực hiện, được nghiệm thu trước đó",
       "Bằng giá trị ghi trong hợp đồng được cập nhật giá tại thời điểm áp dụng hình thức chỉ định thầu trừ đi giá trị của phần công việc đã thực hiện, được nghiệm thu trước đó",
       "Bằng giá trị của phần công việc còn lại được cập nhật giá tại thời điểm áp dụng hình thức chỉ định thầu",
-      "Bằng giá trị ghi trong hợp đồng trừ đi giá trị của phần công việc đã thực hiện trước đó theo dự",
-      "toán được duyệt"
+      "Bằng giá trị ghi trong hợp đồng trừ đi giá trị của phần công việc đã thực hiện trước đó theo dự toán được duyệt"
     ],
     "answer": 0
   },
@@ -2180,8 +2169,7 @@
       "Các thành viên liên danh thỏa thuận, điều chỉnh về phạm vi công việc, tiến độ được rút ngắn và không phải thông báo cho chủ đầu tư",
       "Các thành viên liên danh thỏa thuận, điều chỉnh về phạm vi công việc, tiến độ được rút ngắn và thông báo cho chủ đầu tư",
       "Phải được người có thẩm quyền cho phép chủ đầu tư và nhà thầu thỏa thuận, điều chỉnh phạm vi công việc giữa các thành viên liên danh phù hợp với tiến độ hoặc tiến độ được rút ngắn",
-      "Chủ đầu tư và nhà thầu được thỏa thuận điều chỉnh phạm vi công việc giữa các thành viên liên",
-      "nh phù hợp với tiến độ hoặc tiến độ được rút ngắn"
+      "Chủ đầu tư và nhà thầu được thỏa thuận điều chỉnh phạm vi công việc giữa các thành viên liên danh phù hợp với tiến độ hoặc tiến độ được rút ngắn"
     ],
     "answer": 3
   },
@@ -2553,8 +2541,7 @@
     "id": 231,
     "question": "Đối với đấu thầu qua mạng, khi tham dự thầu, nhà thầu….?",
     "options": [
-      "Chịu trách nhiệm về tính chính xác của các thông tin kê khai trên webform và file tài liệu đính",
-      "kèm",
+      "Chịu trách nhiệm về tính chính xác của các thông tin kê khai trên webform và file tài liệu đính kèm",
       "Chỉ nộp một bộ E-HSDT đối với một E-TBMT",
       "Chỉ được rút, sửa đổi, nộp lại E-HSDT trước thời điểm đóng thầu",
       "Cả 3 đáp án trên đều đúng"
@@ -2645,8 +2632,7 @@
       "Tư cách hợp lệ, nhà thầu không có nhân sự bị tòa án kết án có hành vi vi phạm quy định về đấu thầu gây hậu quả nghiêm trọng, trạng thái bị tạm ngừng, chấm dứt tham gia Hệ thống mạng đấu thầu quốc gia, doanh thu bình quân hằng năm.",
       "Tư cách hợp lệ, bảo đảm dự thầu, thực hiện nghĩa vụ kê khai thuế và nộp thuế, kết quả hoạt động tài chính, doanh thu bình quân hằng năm",
       "Tư cách hợp lệ, nhà thầu không có nhân sự bị tòa án kết án có hành vi vi phạm quy định về đấu thầu gây hậu quả nghiêm trọng, trạng thái bị tạm ngừng, chấm dứt tham gia Hệ thống mạng đấu thầu quốc gia, thực hiện nghĩa vụ kê khai thuế và nộp thuế, kết quả hoạt động tài chính, doanh thu bình quân hằng năm",
-      "Tư cách hợp lệ, nhà thầu không có nhân sự bị tòa án kết án có hành vi vi phạm quy định về đấu thầu gây hậu quả nghiêm trọng, lịch sử không hoàn thành hợp đồng do lỗi của nhà thầu, thực hiện",
-      "nghĩa vụ kê khai thuế và nộp thuế, kết quả hoạt động tài chính, doanh thu bình quân hằng năm"
+      "Tư cách hợp lệ, nhà thầu không có nhân sự bị tòa án kết án có hành vi vi phạm quy định về đấu thầu gây hậu quả nghiêm trọng, lịch sử không hoàn thành hợp đồng do lỗi của nhà thầu, thực hiện nghĩa vụ kê khai thuế và nộp thuế, kết quả hoạt động tài chính, doanh thu bình quân hằng năm"
     ],
     "answer": 3
   },
@@ -2657,8 +2643,7 @@
       "Gói thầu mua sắm hàng hóa áp dụng phương thức một giai đoạn một túi hồ sơ, sử dụng phương pháp “giá thấp nhất” và các nhà thầu, E-HSDT đều không có bất kỳ ưu đãi nào",
       "Gói thầu dịch vụ phi tư vấn áp dụng phương thức một giai đoạn một túi hồ sơ, sử dụng phương pháp “giá đánh giá” và các nhà thầu, E-HSDT chào ưu đãi như nhau",
       "Gói thầu xây lắp áp dụng phương thức một giai đoạn một túi hồ sơ, sử dụng phương pháp “giá thấp nhất” và các nhà thầu, E-HSDT đều không có bất kỳ ưu đãi nào",
-      "Gói thầu máy đặt, máy mượn áp dụng phương thức một giai đoạn một túi hồ sơ, sử dụng",
-      "phương pháp “giá thấp nhất” và các nhà thầu, E-HSDT chào ưu đãi như nhau"
+      "Gói thầu máy đặt, máy mượn áp dụng phương thức một giai đoạn một túi hồ sơ, sử dụng phương pháp “giá thấp nhất” và các nhà thầu, E-HSDT chào ưu đãi như nhau"
     ],
     "answer": 0
   },
@@ -2689,8 +2674,7 @@
     "question": "Theo quy định tại Thông tư số 79/2025/TT- BTC, quy định về thời điểm bắt đầu và kết thúc chào giá trực tuyến theo quy trình rút gọn?",
     "options": [
       "Thời điểm bắt đầu và kết thúc phải trong giờ hành chính.",
-      "Thời điểm bắt đầu không bắt buộc trong giờ hành chính nhưng kết thúc phải trong giờ hành",
-      "ính.",
+      "Thời điểm bắt đầu không bắt buộc trong giờ hành chính nhưng kết thúc phải trong giờ hành chính.",
       "Thời điểm bắt đầu và kết thúc không bắt buộc trong giờ hành chính.",
       "Tất cả phương án trên đều sai"
     ],
@@ -2744,7 +2728,9 @@
     "id": 248,
     "question": "Đối với chào giá trực tuyến rút gọn, kể từ\nlượt chào giá thứ hai, giá chào của nhà thầu không được thấp hơn giá thấp nhất hiển thị trên Hệ thống mạng đấu thầu quốc gia là bao\nnhiêu %?",
     "options": [
-      "80% B.85% C.90%",
+      "80%",
+      "85%",
+      "90%",
       "95%"
     ],
     "answer": 2
@@ -2765,8 +2751,7 @@
     "question": "Đối với gói thầu áp dụng chào giá trực tuyến theo quy trình thông thường, trường hợp nhà thầu được mời tham gia chào giá trực tuyến nhưng nhà thầu từ chối tham gia thì xử lý\nthế nào?",
     "options": [
       "Đề  xuất về tài chính của nhà thầu sẽ bị đánh giá là không đạt",
-      "Nhà thầu sẽ bị loại và bị khóa tài khoản trên Hệ thống mạng đấu thầu quốc gia trong vòng 06",
-      "tháng",
+      "Nhà thầu sẽ bị loại và bị khóa tài khoản trên Hệ thống mạng đấu thầu quốc gia trong vòng 06 tháng",
       "Hồ sơ dự thầu của nhà thầu sẽ tiếp tục được đánh giá về tài chính căn cứ theo hồ sơ dự thầu đã nộp trước thời điểm đóng thầu",
       "Phương án A và B đều đúng"
     ],
@@ -2787,8 +2772,7 @@
     "id": 252,
     "question": "Trong mua sắm tập trung áp dụng đấu thầu rộng rãi, hợp đồng điện tử có thể được ký kết giữa các đối tượng nào?",
     "options": [
-      "Đơn vị mua sắm tập trung và các nhà thầu trúng thầu (trong trường hợp không ký thỏa thuận",
-      "khung)",
+      "Đơn vị mua sắm tập trung và các nhà thầu trúng thầu (trong trường hợp không ký thỏa thuận khung)",
       "Đơn vị có nhu cầu mua sắm với các nhà thầu trúng thầu (trong trường hợp đơn vị mua sắm tập trung ký thỏa thuận khung với nhà thầu trúng thầu)",
       "Phương án A và B đều đúng",
       "Phương án A và B đều sai"
@@ -2933,8 +2917,7 @@
     "id": 265,
     "question": "Đối với đấu thầu qua mạng, sau khi đánh giá E-HSDT, tổ trưởng tổ chuyên gia phải thực hiện nội dung gì sau đây trên Hệ thống mạng đấu thầu quốc gia?",
     "options": [
-      "Đính kèm bản scan báo cáo đánh giá E-HSDT (có chữ ký của tất cả thành viên trong tổ chuyên",
-      "gia)",
+      "Đính kèm bản scan báo cáo đánh giá E-HSDT (có chữ ký của tất cả thành viên trong tổ chuyên gia)",
       "Đính kèm bản scan báo cáo đánh giá E-HSDT (không cần có chữ ký của tất cả thành viên trong tổ chuyên gia)",
       "Đính kèm bản scan báo cáo đánh giá E-HSDT (chỉ cần chữ ký của tổ trưởng tổ chuyên gia)",
       "Tất cả các phương án đều sai"
@@ -3212,8 +3195,7 @@
       "Hợp đồng theo đơn giá cố định áp dụng cho gói thầu có thời gian thực hiện dài, hợp đồng theo đơn giá điều chỉnh áp dụng cho gói thầu có thời gian thực hiện ngắn",
       "Đơn giá trong hợp đồng đơn giá cố định không thay đổi, còn đơn giá trong hợp đồng đơn giá điều chỉnh có thể thay đổi",
       "Hợp đồng theo đơn giá cố định không có chi phí dự phòng, còn hợp đồng theo đơn giá điều chỉnh có chi phí dự phòng",
-      "Hợp đồng theo đơn giá cố định chỉ áp dụng cho gói thầu dịch vụ tư vấn, hợp đồng theo đơn giá điều chỉnh",
-      "áp dụng cho gói thầu xây lắp"
+      "Hợp đồng theo đơn giá cố định chỉ áp dụng cho gói thầu dịch vụ tư vấn, hợp đồng theo đơn giá điều chỉnh áp dụng cho gói thầu xây lắp"
     ],
     "answer": 1
   },
@@ -4253,8 +4235,7 @@
     "options": [
       "Nhà thầu liên danh trong đó có thành viên liên danh là nhà thầu Nhật Bản và thành viên này đảm nhận từ 50% trở lên giá trị công việc của gói thầu",
       "Nhà thầu liên danh trong đó có thành viên liên danh là nhà thầu nội khối và thành viên này đảm nhận từ 25% trở lên giá trị công việc của gói thầu",
-      "Nhà thầu liên danh trong đó có thành viên liên danh là nhà thầu Hoa Kỳ và thành viên này đảm nhận từ 50% trở",
-      "lên giá trị công việc của gói thầu",
+      "Nhà thầu liên danh trong đó có thành viên liên danh là nhà thầu Hoa Kỳ và thành viên này đảm nhận từ 50% trở lên giá trị công việc của gói thầu",
       "Nhà thầu liên danh trong đó có thành viên liên danh là nhà thầu nội khối và thành viên này đảm nhận từ 40% trở lên giá trị công việc của gói thầu"
     ],
     "answer": 0
