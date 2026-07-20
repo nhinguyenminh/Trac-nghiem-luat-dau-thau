@@ -834,11 +834,9 @@
     "id": 76,
     "question": "Đối với gói thầu xây dựng “Trường trung học phổ thông A”, bao gồm tổ hợp các công trình:\n+ Nhà A1 (Nhà học): Cao 10 tầng, tổng diện\ntích sàn 8.000 m2, có giá trị theo dự toán được duyệt là (2X) VND. Nhà A1 là công trình kết cấu dạng nhà cấp II theo quy định của Thông tư số 06/2021/TT-BXD.\n+ Nhà A2 (Nhà học): Cao 6 tầng, tổng diện tích sàn 1.000 m2, có giá trị theo dự toán được duyệt là (Y) VND. Nhà A2 là công\ntrình kết cấu dạng nhà cấp III theo quy định của Thông tư số  6/2021/TT-BXD.\n+ Hàng rào bảo vệ: Cao 3m\n+ Nhà bảo vệ: Cao 1 tầng, diện tích sàn 12 m2.\nKinh nghiệm thi công công trình tương tự được\nquy định trong hồ sơ mời thầu như thế nào là phù hợp?",
     "options": [
-      "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp II, có giá trị tối thiểu là",
-      "50% x (2X) VND",
+      "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp II, có giá trị tối thiểu là 50% x (2X) VND",
       "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp II, có giá trị tối thiểu là 50% x (2X) VND, trong đó phải bao gồm hạng mục hàng rào bảo vệ, nhà bảo vệ",
-      "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp III, có giá trị tối thiểu là",
-      "50% x (2X) VND",
+      "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp III, có giá trị tối thiểu là 50% x (2X) VND",
       "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp III, có giá trị tối thiểu là 50% x (2X) VND, trong đó phải bao gồm hạng mục hàng rào bảo vệ, nhà bảo vệ"
     ],
     "answer": 0
@@ -880,8 +878,7 @@
     "id": 80,
     "question": "Nội dung nào không phù hợp với quy định về nhà thầu phụ đối với gói thầu mua sắm hàng hóa?",
     "options": [
-      "Chủ đầu tư phải ghi tỷ lệ % giá trị dành cho nhà thầu phụ trong E-BDL làm cơ sở để nhà thầu lập",
-      "E-HSDT",
+      "Chủ đầu tư phải ghi tỷ lệ % giá trị dành cho nhà thầu phụ trong E-BDL làm cơ sở để nhà thầu lập E-HSDT",
       "Năng lực và kinh nghiệm của nhà thầu phụ sẽ không được xem xét khi đánh giá E-HSDT của nhà thầu",
       "Nhà thầu được ký kết hợp đồng với các nhà thầu phụ trong danh sách các nhà thầu phụ nêu trong",
       "E-HSDT",
@@ -1092,8 +1089,7 @@
     "id": 99,
     "question": "Đối với đấu thầu qua mạng, trường hợp cần sửa đổi E-HSDT đã nộp trước thời điểm đóng thầu, nhà thầu phải thực hiện theo phương án nào sau đây trong trường hợp E-HSMT của gói thầu này không phải sửa đổi?",
     "options": [
-      "Phải tiến hành rút toàn bộ E-HSDT đã nộp trước đó để sửa đổi cho phù hợp và tiến hành nộp lại",
-      "E-HSDT mới",
+      "Phải tiến hành rút toàn bộ E-HSDT đã nộp trước đó để sửa đổi cho phù hợp và tiến hành nộp lại E-HSDT mới",
       "Không phải tiến hành rút toàn bộ E-HSDT đã nộp trước đó, chỉ cần sửa đổi cho phù hợp và tiến hành nộp lại E-HSDT mới",
       "Sửa đổi cho phù hợp E-HSDT đã nộp mà không phải nộp lại E- HSDT mới",
       "Nhà thầu không được sửa đổi E-HSDT đã nộp"
@@ -1174,8 +1170,7 @@
       "Gói thầu xây lắp, hàng hóa và dịch vụ phi tư vấn áp dụng hình thức chào hàng cạnh tranh và sử dụng phương pháp dựa trên kỹ thuật để đánh giá về tài chính và có giá đề nghị trúng thầu vượt giá gói thầu được phép thương thảo về chi phí",
       "Gói thầu mua thuốc áp dụng phương thức một giai đoạn hai túi hồ sơ và sử dụng phương pháp kết hợp giữa kỹ thuật và giá được phép thương thảo về chi phí trong quá trình thương thảo hợp đồng",
       "Gói thầu dịch vụ tư vấn áp dụng hình thức đấu thầu rộng rãi được phép thương thảo về chi phí trong quá trình thương thảo hợp đồng",
-      "Không được phép thương thảo về chi phí trong quá trình thương thảo hợp đồng đối với tất cả các",
-      "gói thầu, trừ trường hợp nhà thầu tự nguyện giảm giá"
+      "Không được phép thương thảo về chi phí trong quá trình thương thảo hợp đồng đối với tất cả các gói thầu, trừ trường hợp nhà thầu tự nguyện giảm giá"
     ],
     "answer": 2
   },
@@ -1241,8 +1236,7 @@
       "Nhà thầu có 2 công trình xây dựng có loại kết cấu dạng nhà cấp III với giá trị đã hoàn thành toàn bộ lần lượt là 30 tỷ đồng, 50 tỷ đồng",
       "Nhà thầu có 2 công trình xây dựng có loại kết cấu dạng nhà cấp III với giá trị đã hoàn thành toàn bộ lần lượt là 30 tỷ đồng, 20 tỷ đồng",
       "Nhà thầu có 3 công trình xây dựng có loại kết cấu dạng nhà cấp III với giá trị đã hoàn thành toàn bộ lần lượt là 30 tỷ đồng, 20 tỷ đồng, 10 tỷ đồng",
-      "Nhà thầu có 1 công trình xây dựng có loại kết cấu dạng nhà cấp III với giá trị đã hoàn thành toàn",
-      "là 60 tỷ đồng"
+      "Nhà thầu có 1 công trình xây dựng có loại kết cấu dạng nhà cấp III với giá trị đã hoàn thành toàn bộ là 60 tỷ đồng"
     ],
     "answer": 0
   },
@@ -1361,8 +1355,7 @@
     "question": "Hồ sơ hợp đồng bao gồm các tài liệu nào sau\nđây?",
     "options": [
       "Văn bản hợp đồng",
-      "Phụ lục hợp đồng gồm danh mục chi tiết về phạm vi công việc, biểu giá, tiến độ thực hiện (nếu",
-      ")",
+      "Phụ lục hợp đồng gồm danh mục chi tiết về phạm vi công việc, biểu giá, tiến độ thực hiện (nếu có)",
       "Quyết định phê duyệt kết quả lựa chọn nhà thầu",
       "Tất cả các phương án trên."
     ],
@@ -1543,8 +1536,7 @@
     "question": "Thời hạn của thỏa thuận khung:",
     "options": [
       "Thời hạn áp dụng thỏa thuận khung được quy định là 40 tháng",
-      "Thời hạn áp dụng thỏa thuận khung được quy định trong kế hoạch lựa chọn nhà thầu nhưng không",
-      "quá 36 tháng",
+      "Thời hạn áp dụng thỏa thuận khung được quy định trong kế hoạch lựa chọn nhà thầu nhưng không quá 36 tháng",
       "Thời hạn áp dụng thỏa thuận khung do người có thẩm quyền quyết định trong kế hoạch lựa chọn nhà thầu",
       "Phương án B và C đều đúng"
     ],
@@ -1602,8 +1594,7 @@
       "Nhà thầu sẽ bị khóa tài khoản trên Hệ thống mạng đấu thầu quốc gia trong thời hạn 06 tháng kể từ ngày đơn vị có nhu cầu mua sắm công khai tên nhà thầu trên Hệ thống mạng đấu thầu quốc gia",
       "Nhà thầu sẽ bị khóa tài khoản trên Hệ thống mạng đấu thầu quốc gia trong thời hạn 06 tháng kể từ ngày đơn vị mua sắm tập trung công khai tên nhà thầu trên Hệ thống mạng đấu thầu quốc gia, trừ trường hợp bất khả kháng",
       "Nhà thầu sẽ bị khóa tài khoản trên Hệ thống mạng đấu thầu quốc gia trong thời hạn trong thời hạn 03 tháng kể từ ngày Bộ Tài chính nhận được văn bản đề nghị của đơn vị có nhu cầu mua sắm, trừ trường hợp bất khả kháng",
-      "Nhà thầu sẽ bị khóa tài khoản trên Hệ thống mạng đấu thầu quốc gia trong thời hạn trong thời hạn 06 tháng kể từ ngày Bộ Tài chính nhận được văn bản đề nghị của đơn vị có nhu cầu mua sắm, trừ",
-      "trường hợp bất khả kháng"
+      "Nhà thầu sẽ bị khóa tài khoản trên Hệ thống mạng đấu thầu quốc gia trong thời hạn trong thời hạn 06 tháng kể từ ngày Bộ Tài chính nhận được văn bản đề nghị của đơn vị có nhu cầu mua sắm, trừ trường hợp bất khả kháng"
     ],
     "answer": 1
   },
@@ -1614,8 +1605,7 @@
       "Phải đảm bảo tổng số lượng hàng hóa mà các nhà thầu trúng thầu chào thầu tối thiểu bằng số lượng hàng hóa nêu trong hồ sơ mời thầu, đồng thời bảo đảm điểm tổng hợp của gói thầu cao nhất",
       "Phải đảm bảo tổng số lượng hàng hóa mà các nhà thầu trúng thầu chào thầu bằng số lượng hàng hóa nêu trong hồ sơ mời thầu, đồng thời bảo đảm tổng giá đề nghị trúng thầu của gói thầu cao nhất",
       "Phải đảm bảo tổng số lượng hàng hóa mà các nhà thầu trúng thầu chào thầu bằng số lượng hàng hóa nêu trong hồ sơ mời thầu, đồng thời bảo đảm tổng giá đề nghị trúng thầu của gói thầu thấp nhất",
-      "Phải đảm bảo tổng số lượng hàng hóa mà các nhà thầu trúng thầu chào thầu bằng số lượng hàng",
-      "hóa nêu trong hồ sơ mời thầu, đồng thời bảo đảm tổng giá đánh giá của gói thầu là thấp nhất"
+      "Phải đảm bảo tổng số lượng hàng hóa mà các nhà thầu trúng thầu chào thầu bằng số lượng hàng hóa nêu trong hồ sơ mời thầu, đồng thời bảo đảm tổng giá đánh giá của gói thầu là thấp nhất"
     ],
     "answer": 2
   },
@@ -1812,8 +1802,7 @@
     "options": [
       "Cấm tham gia hoạt động đấu thầu từ 03 năm đến 05 năm đối với thành viên A",
       "Cấm tham gia hoạt động đấu thầu từ 01 năm đến dưới 03 năm đối với thành viên A",
-      "Cấm tham gia hoạt động đấu thầu từ 03 năm đến 05 năm đối với tất cả thành viên trong nhà thầu",
-      "liên danh A-B",
+      "Cấm tham gia hoạt động đấu thầu từ 03 năm đến 05 năm đối với tất cả thành viên trong nhà thầu liên danh A-B",
       "Cấm tham gia hoạt động đấu thầu từ 01 năm đến 03 năm đối với tất cả thành viên trong nhà thầu",
       "liên danh A-B"
     ],
@@ -2247,8 +2236,7 @@
     "options": [
       "Từ ngày có thời điểm đóng thầu đến khi có kết quả lựa chọn nhà thầu",
       "Từ ngày phát hành hồ sơ mời sơ tuyển, hồ sơ mời quan tâm, hồ sơ mời thầu, hồ sơ yêu cầu đến trước khi ký kết hợp đồng, thỏa thuận khung đối với mua sắm tập trung",
-      "Từ ngày có thời điểm đóng thầu đến khi ký kết hợp đồng, thỏa thuận khung đối với mua sắm tập",
-      "trung",
+      "Từ ngày có thời điểm đóng thầu đến khi ký kết hợp đồng, thỏa thuận khung đối với mua sắm tập trung",
       "Từ ngày phát hành hồ sơ mời sơ tuyển, hồ sơ mời quan tâm, hồ sơ mời thầu, hồ sơ yêu cầu kể cả sau khi đã ký hợp đồng"
     ],
     "answer": 1
@@ -3088,7 +3076,7 @@
   },
   {
     "id": 278,
-    "question": "Gói thầu mua sắm hàng hóa có:\n- Thời điểm đóng thầu theo E-TBMT là: 8h00 ngày 25/9/2025\n- Hiệu lực của bảo đảm dự thầu theo yêu cầu của E-HSMT là: 90 ngày\n- Do lỗi hệ thống nên Hệ thống tự động gia hạn thời điểm đóng thầu mới là: 11h ngày 26/9/2025\nNhà thầu A đã nộp E-HSDT trước thời điểm Hệ thống xảy ra sự cố với hiệu lực của bảo đảm dự thầu là 90 ngày kể từ ngày 25/9/2025; Nhà thầu B nộp E-HSDT sau khi Hệ thống được khắc phục và trước thời điểm đóng thầu mới với hiệu lực của bảo đảm dự thầu là 90 ngày kể từ ngày 26/9/2025. Trong trường hợp này, bảo đảm dự thầu của nhà thầu A và nhà thầu B được đánh giá như thế\nnào?",
+    "question": "Gói thầu mua sắm hàng hóa có:\n- Thời điểm đóng thầu theo E-TBMT là: 8h00 ngày 25/9/2025\n- Hiệu lực của bảo đảm dự thầu theo yêu cầu của E-HSMT là: 90 ngày\n- Do lỗi hệ thống nên Hệ thống tự động gia hạn thời điểm đóng thầu mới là: 11h ngày 26/9/2025\nNhà thầu A đã nộp E-HSDT trước thời điểm Hệ thống xảy ra sự cố với hiệu lực của bảo đảm dự thầu là 90 ngày kể từ ngày 25/9/2025; Nhà thầu B nộp E-HSDT sau khi Hệ thống được khắc phục và trước thời điểm đóng thầu mới với hiệu lực của bảo đảm dự thầu là 90 ngày kể từ ngày 26/9/2025. Trong trường hợp này, bảo đảm dự thầu của nhà thầu A và nhà thầu B được đánh giá như thế nào?",
     "options": [
       "Bảo đảm dự thầu của nhà thầu A được đánh giá là không hợp lệ; Bảo đảm dự thầu của nhà thầu B được đánh giá là hợp lệ",
       "Bảo đảm dự thầu của nhà thầu A và nhà thầu B đều được đánh giá là hợp lệ",
@@ -3813,8 +3801,7 @@
     "options": [
       "Quy trình 02 áp dụng đối với gói thầu mua sắm hàng hóa, dịch vụ phi tư vấn, máy đặt, máy mượn theo phương thức một giai đoạn một túi hồ sơ, sử dụng phương pháp “giá thấp nhất” và các nhà thầu, E-HSDT đều không có bất kỳ ưu đãi nào",
       "Hệ thống tự động xếp hạng nhà thầu theo giá dự thầu sau khi trừ đi giá trị giảm giá (nếu có) thấp nhất (không phải phê duyệt danh sách xếp hạng nhà thầu) đối với gói thầu áp dụng quy trình 02",
-      "Trường hợp có từ 02 nhà thầu trở lên cùng xếp thứ nhất thì không đánh giá theo quy trình 02 mà phải đánh giá",
-      "theo quy trình 01",
+      "Trường hợp có từ 02 nhà thầu trở lên cùng xếp thứ nhất thì không đánh giá theo quy trình 02 mà phải đánh giá theo quy trình 01",
       "Cả 3 đáp án đều đúng"
     ],
     "answer": 3
