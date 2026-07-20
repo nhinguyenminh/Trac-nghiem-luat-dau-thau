@@ -159,8 +159,7 @@
     "options": [
       "Gói thầu mua sắm hàng hóa thông dụng, đơn giản, có sẵn trên thị trường",
       "Gói thầu mua sắm hàng hóa mà hàng hóa đó trong nước sản xuất được và đáp ứng các yêu cầu về kỹ thuật, chất lượng, giá nhưng chủ đầu tư yêu cầu phải mua hàng hóa nhập khẩu",
-      "Gói thầu mua sắm hàng hóa mà hàng hóa đó trong nước không sản xuất được hoặc sản xuất",
-      "được nhưng không đáp ứng một trong các yêu cầu về kỹ thuật, chất lượng, giá",
+      "Gói thầu mua sắm hàng hóa mà hàng hóa đó trong nước không sản xuất được hoặc sản xuất được nhưng không đáp ứng một trong các yêu cầu về kỹ thuật, chất lượng, giá",
       "Gói thầu mua sắm hàng hóa thông dụng đã được nhập khẩu và chào bán tại Việt Nam nhưn hàng hóa đó trong nước không sản xuất được"
     ],
     "answer": 2
@@ -271,8 +270,7 @@
       "Sở Y tế A được tự quyết định việc mua sắm trên cơ sở bảo đảm công khai, minh bạch, hiệu quả và trách nhiệm giải trình trong trường hợp nhà tài trợ yêu cầu không lựa chọn nhà thầu theo quy định của Luật Đấu thầu",
       "Sở Y tế A phải tổ chức lựa chọn nhà thầu theo quy định của Luật Đấu thầu",
       "Trong mọi trường hợp Sở Y tế A không phải thực hiện theo Luật Đấu thầu do đây là nguồn doanh nghiệp trong nước tài trợ",
-      "Phải xin ý kiến của UBND tỉnh A để có cơ sở xác định có phải tổ chức lựa chọn nhà thầu theo",
-      "Luật Đấu thầu hay không"
+      "Phải xin ý kiến của UBND tỉnh A để có cơ sở xác định có phải tổ chức lựa chọn nhà thầu theo Luật Đấu thầu hay không"
     ],
     "answer": 0
   },
@@ -789,8 +787,7 @@
       "Hàng hóa của nhà thầu không được xem xét, đánh giá",
       "Hàng hóa của nhà thầu vẫn được xem xét, đánh giá",
       "Yêu cầu nhà thầu bổ sung hàng hóa theo đúng xuất xứ thuộc nhóm nước, vùng lãnh thổ theo yêu cầu hồ sơ mời thầu nhưng phải cùng ký mã hiệu, nhãn hiệu với hàng hóa nhà thầu đã đề xuất trong hồ sơ dự thầu",
-      "Yêu cầu nhà thầu bổ sung hàng hóa theo đúng xuất xứ thuộc nhóm nước, vùng lãnh thổ theo yêu cầu hồ sơ mời thầu, không phải đáp ứng cùng ký mã hiệu, nhãn hiệu với hàng hóa nhà thầu đã đề",
-      "xuất trong hồ sơ dự thầu"
+      "Yêu cầu nhà thầu bổ sung hàng hóa theo đúng xuất xứ thuộc nhóm nước, vùng lãnh thổ theo yêu cầu hồ sơ mời thầu, không phải đáp ứng cùng ký mã hiệu, nhãn hiệu với hàng hóa nhà thầu đã đề xuất trong hồ sơ dự thầu"
     ],
     "answer": 1
   },
@@ -1394,8 +1391,7 @@
     "options": [
       "Hồ sơ mời quan tâm, hồ sơ mời sơ tuyển, hồ sơ mời thầu được phát hành sau 01 ngày kể từ khi thông báo mời quan tâm, thông báo mời sơ tuyển, thông báo mời thầu được đăng tải thành công trên Hệ thống mạng đấu thầu quốc gia",
       "Hồ sơ mời quan tâm, hồ sơ mời sơ tuyển, hồ sơ mời thầu được phát hành trước khi đăng tải thông báo mời quan tâm, thông báo mời sơ tuyển, thông báo mời thầu",
-      "Hồ sơ mời quan tâm, hồ sơ mời sơ tuyển, hồ sơ mời thầu được phát hành sau 03 ngày kể từ khi",
-      "thông báo mời quan tâm, thông báo mời sơ tuyển, thông báo mời thầu được đăng tải thành công trên Hệ thống mạng đấu thầu quốc gia",
+      "Hồ sơ mời quan tâm, hồ sơ mời sơ tuyển, hồ sơ mời thầu được phát hành sau 03 ngày kể từ khi thông báo mời quan tâm, thông báo mời sơ tuyển, thông báo mời thầu được đăng tải thành công trên Hệ thống mạng đấu thầu quốc gia",
       "Hồ sơ mời quan tâm, hồ sơ mời sơ tuyển, hồ sơ mời thầu được phát hành ngay sau khi đăng tải thành công thông báo mời quan tâm, thông báo mời sơ tuyển, thông báo mời thầu"
     ],
     "answer": 3
@@ -1407,8 +1403,7 @@
       "Đấu thầu trước là việc thực hiện trước một số thủ tục trước khi dự án được phê duyệt đầu tư nhằm mục đích đẩy nhanh tiến độ thực hiện dự án, trừ gói thầu cần thực hiện trước khi phê duyệt dự án",
       "Đấu thầu trước là việc thực hiện các gói thầu thuộc giai đoạn chuẩn bị đầu tư",
       "Đấu thầu trước là việc lựa chọn nhà thầu không cần phê duyệt kế hoạch lựa chọn nhà thầu để đẩy nhanh tiến độ thực hiện",
-      "Đấu thầu trước là việc thực hiện trước một số thủ tục trước khi dự án, dự toán mua sắm được phê duyệt nhằm mục đích đẩy nhanh tiến độ thực hiện dự án, dự toán mua sắm, trừ gói thầu cần thực",
-      "hiện trước khi phê duyệt dự án"
+      "Đấu thầu trước là việc thực hiện trước một số thủ tục trước khi dự án, dự toán mua sắm được phê duyệt nhằm mục đích đẩy nhanh tiến độ thực hiện dự án, dự toán mua sắm, trừ gói thầu cần thực hiện trước khi phê duyệt dự án"
     ],
     "answer": 0
   },
@@ -1474,8 +1469,7 @@
       "Chuẩn bị và gửi dự thảo hợp đồng cho nhà thầu; thương thảo, hoàn thiện hợp đồng; trình, thẩm định, phê duyệt và công khai kết quả lựa chọn nhà thầu; ký kết hợp đồng",
       "Chuẩn bị và gửi dự thảo hợp đồng cho nhà thầu; thương thảo hợp đồng; trình, thẩm định, phê duyệt kết quả lựa chọn nhà thầu; ký kết và quản lý thực hiện hợp đồng",
       "Chuẩn bị và gửi dự thảo hợp đồng cho nhà thầu; hoàn thiện hợp đồng, phê duyệt và công khai kết quả lựa chọn nhà thầu; ký kết và quản lý thực hiện hợp đồng",
-      "Lập, phê duyệt hồ sơ yêu cầu; xác định nhà thầu dự kiến được mời nhận hồ sơ yêu cầu; đánh giá",
-      "hồ sơ đề xuất và thương thảo về các đề xuất của nhà thầu; phê duyệt và công khai kết quả lựa chọn nhà thầu; hoàn thiện, ký kết và quản lý thực hiện hợp đồng"
+      "Lập, phê duyệt hồ sơ yêu cầu; xác định nhà thầu dự kiến được mời nhận hồ sơ yêu cầu; đánh giá hồ sơ đề xuất và thương thảo về các đề xuất của nhà thầu; phê duyệt và công khai kết quả lựa chọn nhà thầu; hoàn thiện, ký kết và quản lý thực hiện hợp đồng"
     ],
     "answer": 2
   },
@@ -2885,8 +2879,7 @@
     "options": [
       "Nhà thầu chịu trách nhiệm theo dõi thông tin trên Hệ thống mạng đấu thầu quốc gia để cập nhật thông tin về việc sửa đổi E- HSMT, thay đổi thời điểm đóng thầu (nếu có) để làm cơ sở chuẩn bị E- HSDT",
       "Nhà thầu phải tự chịu trách nhiệm và chịu bất lợi trong quá trình tham dự thầu nếu không theo dõi, cập nhật thông tin sửa đổi E-HSMT, thời điểm đóng thầu trên Hệ thống mạng đấu thầu quốc gia trong quá trình tham dự thầu",
-      "Hệ thống mạng đấu thầu quốc gia tự động gửi email thông báo về việc sửa đổi E-HSMT, thay",
-      "đổi thời điểm đóng thầu (nếu có) cho các nhà thầu quan tâm đến gói thầu",
+      "Hệ thống mạng đấu thầu quốc gia tự động gửi email thông báo về việc sửa đổi E-HSMT, thay đổi thời điểm đóng thầu (nếu có) cho các nhà thầu quan tâm đến gói thầu",
       "Các phương án trên đều đúng"
     ],
     "answer": 3
@@ -3514,8 +3507,7 @@
     "question": "Hiện nay, Việt Nam đã mở cửa thị trường mua sắm chính phủ (đấu thầu) trong những hiệp định nào?",
     "options": [
       "Chỉ Hiệp định Đối tác Toàn diện và Tiến bộ Xuyên Thái Bình Dương (CPTPP)",
-      "Hiệp định CPTPP và Hiệp định thương mại tự do giữa Cộng hòa xã hội chủ nghĩa Việt Nam và Liên",
-      "minh Châu Âu (EVFTA)",
+      "Hiệp định CPTPP và Hiệp định thương mại tự do giữa Cộng hòa xã hội chủ nghĩa Việt Nam và Liên minh Châu Âu (EVFTA)",
       "Hiệp định CPTPP, Hiệp định EVFTA và Hiệp định Thương mại Tự do giữa Việt Nam và Liên hiệp Vương quốc Anh và Bắc Ailen (UKVFTA)",
       "Tất cả các hiệp định mà Việt Nam là thành viên"
     ],
@@ -3934,7 +3926,7 @@
     "id": 357,
     "question": "Trong chào giá trực tuyến theo quy trình rút gọn gói thầu hàng hóa, phát biểu nào sau đây không đúng?",
     "options": [
-      "Đối với lần chào giá đầu tiên nhà thầu nhập các trọng số là đơn giá của hàng hóa nhà thầu dự kiến xác định sẽ",
+      "Đối với lần chào giá đầu tiên nhà thầu nhập các trọng số là đơn giá của hàng hóa nhà thầu dự kiến xác định sẽ chào",
       "Nhà thầu không được thay đổi trọng số của từng hạng mục hàng hóa trong quá trình chào giá",
       "Nhà thầu cần nghiên cứu công thức tính thành tiền và đơn giá dự thầu từ các trọng số để đề xuất các trọng số cho",
       "Nhà thầu phải điền các trọng số về đơn giá (N1, N2,...) của từng hạng mục"
@@ -4024,8 +4016,7 @@
     "question": "Nội dung nào là không phù hợp quy định đối với yêu cầu về nhân sự chủ chốt của gói thầu mua sắm hàng hóa?",
     "options": [
       "Không được yêu cầu về huy động nhân sự chủ chốt đối với phần công việc cung cấp hàng hóa",
-      "Chỉ được yêu cầu về huy động nhân sự chủ chốt đối với các dịch vụ liên quan có yếu tố đặc thù, phức tạp cần",
-      "thiết phải có nhân sự có hiểu biết, nhiều kinh nghiệm đảm nhận.",
+      "Chỉ được yêu cầu về huy động nhân sự chủ chốt đối với các dịch vụ liên quan có yếu tố đặc thù, phức tạp cầnthiết phải có nhân sự có hiểu biết, nhiều kinh nghiệm đảm nhận.",
       "Được yêu cầu về huy động nhân sự chủ chốt đối với phần công việc cung cấp hàng hóa mà hàng hóa đó có tính đặc thù cần sự khẳng định của nhà sản xuất, nhà cung cấp để đảm bảo tính khả thi trong việc cung cấp hàng hóa",
       "Không được nêu yêu cầu huy động về nhân sự chủ chốt đối với hàng hóa thông dụng, sẵn có trên thị trường, không đòi hỏi nhân sự thực hiện dịch vụ liên quan phải có trình độ cao"
     ],
