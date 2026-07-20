@@ -94,6 +94,7 @@ export default function QuizPage() {
   const [current, setCurrent] = useState<Question | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const [locked, setLocked] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   const [history, setHistory] = useState<Attempt[]>([])
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
@@ -244,67 +245,86 @@ export default function QuizPage() {
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          <div id="settings" className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <span className="text-sm font-semibold text-slate-800">Cài đặt</span>
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-              <span className="font-medium text-slate-700">Ôn:</span>
-              <label className="flex items-center gap-1">
-                <input
-                  type="radio"
-                  name="questionScope"
-                  checked={settings.questionScope === "all"}
-                  onChange={() => setValue("questionScope", "all")}
-                  className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
-                />
-                Tất cả
-              </label>
-              <label className="flex items-center gap-1">
-                <input
-                  type="radio"
-                  name="questionScope"
-                  checked={settings.questionScope === "first200"}
-                  onChange={() => setValue("questionScope", "first200")}
-                  className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
-                />
-                200 câu đầu
-              </label>
-              <label className="flex items-center gap-1">
-                <input
-                  type="radio"
-                  name="questionScope"
-                  checked={settings.questionScope === "after200"}
-                  onChange={() => setValue("questionScope", "after200")}
-                  className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
-                />
-                200 câu sau
-              </label>
+          <button
+            type="button"
+            onClick={() => setShowSettings((value) => !value)}
+            className="mb-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-800"
+          >
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-ms-blue-soft text-ms-blue-dark">
+              {showSettings ? "−" : "+"}
+            </span>
+            Cài đặt
+          </button>
+
+          {showSettings && (
+            <div id="settings" className="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+                <span className="font-medium text-slate-700">Ôn:</span>
+                <label className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="questionScope"
+                    checked={settings.questionScope === "all"}
+                    onChange={() => setValue("questionScope", "all")}
+                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                  />
+                  Tất cả
+                </label>
+                <label className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="questionScope"
+                    checked={settings.questionScope === "first200"}
+                    onChange={() => setValue("questionScope", "first200")}
+                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                  />
+                  200 câu đầu
+                </label>
+                <label className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="questionScope"
+                    checked={settings.questionScope === "after200"}
+                    onChange={() => setValue("questionScope", "after200")}
+                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                  />
+                  200 câu sau
+                </label>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700">
+                <p className="mb-2 font-medium text-slate-800">Chế độ chuyển câu</p>
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
+                    <input
+                      type="radio"
+                      name="transitionMode"
+                      checked={settings.autoNext}
+                      onChange={() => {
+                        setValue("autoNext", true)
+                        setValue("showNextButton", false)
+                      }}
+                      className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                    />
+                    <span>Tự động chuyển câu sau 3 giây</span>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
+                    <input
+                      type="radio"
+                      name="transitionMode"
+                      checked={!settings.autoNext}
+                      onChange={() => {
+                        setValue("autoNext", false)
+                        setValue("showNextButton", true)
+                      }}
+                      className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                    />
+                    <span>Chuyển câu bằng nút</span>
+                  </label>
+                </div>
+              </div>
             </div>
-            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={settings.autoNext}
-                onChange={() => {
-                  const nextValue = !settings.autoNext
-                  setValue("autoNext", nextValue)
-                  if (nextValue) {
-                    setValue("showNextButton", false)
-                  }
-                }}
-                className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
-              />
-              Tự động chuyển câu sau 3 giây
-            </label>
-            <label className={`flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm ${settings.autoNext ? "text-slate-400" : "text-slate-700"}`}>
-              <input
-                type="checkbox"
-                checked={settings.showNextButton}
-                onChange={() => toggle("showNextButton")}
-                disabled={settings.autoNext}
-                className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              Hiển thị nút chuyển câu
-            </label>
-          </div>
+          )}
 
           <div className="mb-4 flex items-center justify-between">
             <span
