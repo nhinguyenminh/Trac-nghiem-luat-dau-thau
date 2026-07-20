@@ -84,7 +84,7 @@ function readStoredAttempts(): StoredAttempt[] {
 
 export default function QuizPage() {
   const { stats, accuracy, record, reset } = useStats()
-  const { settings, toggle, setValue } = useSettings()
+  const { settings, setValue } = useSettings()
 
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
   const [questions, setQuestions] = useState<Question[]>([])
