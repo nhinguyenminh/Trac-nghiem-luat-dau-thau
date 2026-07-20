@@ -22,6 +22,14 @@ function Header() {
             Trang chủ
           </Link>
           <Link
+            to="/quiz#settings"
+            className={`rounded-md px-3 py-1.5 transition-colors ${
+              pathname.startsWith("/quiz") ? "bg-white/20" : "hover:bg-white/10"
+            }`}
+          >
+            Thiết lập
+          </Link>
+          <Link
             to="/quiz"
             className={`rounded-md px-3 py-1.5 transition-colors ${
               pathname === "/quiz" ? "bg-white/20" : "hover:bg-white/10"

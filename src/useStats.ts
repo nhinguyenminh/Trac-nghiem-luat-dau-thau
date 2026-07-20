@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 import type { Stats } from "./types"
 
 const STORAGE_KEY = "quiz-stats-v1"
+export const ATTEMPTS_KEY = "quiz-attempts-v1"
 
 const emptyStats: Stats = { total: 0, correct: 0, wrong: 0 }
 
@@ -41,6 +42,8 @@ export function useStats() {
 
   const reset = useCallback(() => {
     setStats(emptyStats)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(emptyStats))
+    localStorage.removeItem(ATTEMPTS_KEY)
   }, [])
 
   const accuracy = stats.total === 0 ? 0 : Math.round((stats.correct / stats.total) * 100)

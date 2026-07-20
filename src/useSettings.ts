@@ -1,14 +1,21 @@
 import { useCallback, useEffect, useState } from "react"
+import type { QuestionScope } from "./types"
 
 export interface Settings {
   autoNext: boolean
   showNextButton: boolean
   allowRepeat: boolean
+  questionScope: QuestionScope
 }
 
 const STORAGE_KEY = "quiz-settings-v1"
 
-const defaultSettings: Settings = { autoNext: true, showNextButton: true, allowRepeat: true }
+const defaultSettings: Settings = {
+  autoNext: true,
+  showNextButton: true,
+  allowRepeat: true,
+  questionScope: "all",
+}
 
 function readSettings(): Settings {
   try {
@@ -19,6 +26,10 @@ function readSettings(): Settings {
       autoNext: typeof parsed.autoNext === "boolean" ? parsed.autoNext : defaultSettings.autoNext,
       showNextButton: typeof parsed.showNextButton === "boolean" ? parsed.showNextButton : defaultSettings.showNextButton,
       allowRepeat: typeof parsed.allowRepeat === "boolean" ? parsed.allowRepeat : defaultSettings.allowRepeat,
+      questionScope:
+        parsed.questionScope === "first200" || parsed.questionScope === "after200"
+          ? parsed.questionScope
+          : defaultSettings.questionScope,
     }
   } catch {
     return defaultSettings
@@ -43,5 +54,9 @@ export function useSettings() {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
   }, [])
 
-  return { settings, toggle }
+  const setValue = useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
+    setSettings((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  return { settings, toggle, setValue }
 }

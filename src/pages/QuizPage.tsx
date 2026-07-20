@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRight, Play } from "lucide-react"
-import { useStats } from "../useStats"
+import { ATTEMPTS_KEY, useStats } from "../useStats"
 import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
-import type { Question } from "../types"
+import type { Question, QuestionScope } from "../types"
 
 const LETTERS = ["A", "B", "C", "D"]
 const AUTO_NEXT_MS = 3000
-const ATTEMPTS_KEY = "quiz-attempts-v1"
 
 interface Attempt {
   question: Question
@@ -33,6 +32,13 @@ function shouldShuffleOptions(question: Question): boolean {
     normalized.includes("và")
 
   return !hasMultipleCorrectAnswers
+}
+
+function getQuestionsForScope(questions: Question[], scope: QuestionScope): Question[] {
+  const sorted = [...questions].sort((a, b) => a.id - b.id)
+  if (scope === "first200") return sorted.slice(0, 200)
+  if (scope === "after200") return sorted.slice(200)
+  return sorted
 }
 
 function shuffleQuestion(question: Question): Question {
@@ -78,8 +84,9 @@ function readStoredAttempts(): StoredAttempt[] {
 
 export default function QuizPage() {
   const { stats, accuracy, record, reset } = useStats()
-  const { settings, toggle } = useSettings()
+  const { settings, toggle, setValue } = useSettings()
 
+  const [allQuestions, setAllQuestions] = useState<Question[]>([])
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -129,8 +136,10 @@ export default function QuizPage() {
       })
       .then((data: Question[]) => {
         const rawQuestions = data.map((question) => ({ ...question }))
-        setQuestions(rawQuestions)
-        const firstQuestion = rawQuestions[Math.floor(Math.random() * rawQuestions.length)] ?? null
+        setAllQuestions(rawQuestions)
+        const scopedQuestions = getQuestionsForScope(rawQuestions, settings.questionScope)
+        setQuestions(scopedQuestions)
+        const firstQuestion = scopedQuestions[Math.floor(Math.random() * scopedQuestions.length)] ?? null
         setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
         // rebuild session history from LocalStorage
         const byId = new Map(rawQuestions.map((q) => [q.id, q]))
@@ -149,6 +158,20 @@ export default function QuizPage() {
         setLoading(false)
       })
   }, [])
+
+  useEffect(() => {
+    if (allQuestions.length === 0) return
+    const scopedQuestions = getQuestionsForScope(allQuestions, settings.questionScope)
+    setQuestions(scopedQuestions)
+    setHistory([])
+    setReviewIndex(null)
+    setSelected(null)
+    setLocked(false)
+    setCurrent((prev) => {
+      const nextQuestion = pickRandom(scopedQuestions, prev?.id)
+      return nextQuestion ? shuffleQuestion(nextQuestion) : null
+    })
+  }, [allQuestions, settings.questionScope, pickRandom])
 
   // persist attempts whenever history changes
   useEffect(() => {
@@ -220,8 +243,41 @@ export default function QuizPage() {
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div id="settings" className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
             <span className="text-sm font-semibold text-slate-800">Cài đặt</span>
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+              <span className="font-medium text-slate-700">Ôn:</span>
+              <label className="flex items-center gap-1">
+                <input
+                  type="radio"
+                  name="questionScope"
+                  checked={settings.questionScope === "all"}
+                  onChange={() => setValue("questionScope", "all")}
+                  className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                />
+                Tất cả
+              </label>
+              <label className="flex items-center gap-1">
+                <input
+                  type="radio"
+                  name="questionScope"
+                  checked={settings.questionScope === "first200"}
+                  onChange={() => setValue("questionScope", "first200")}
+                  className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                />
+                200 câu đầu
+              </label>
+              <label className="flex items-center gap-1">
+                <input
+                  type="radio"
+                  name="questionScope"
+                  checked={settings.questionScope === "after200"}
+                  onChange={() => setValue("questionScope", "after200")}
+                  className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                />
+                200 câu sau
+              </label>
+            </div>
             <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
               <input
                 type="checkbox"
