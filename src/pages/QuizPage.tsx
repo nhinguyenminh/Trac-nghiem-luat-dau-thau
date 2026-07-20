@@ -21,17 +21,17 @@ interface StoredAttempt {
 
 function shouldShuffleOptions(question: Question): boolean {
   const answerText = String(question.options[question.answer] ?? "")
-  const normalized = answerText.toLowerCase().trim()
+  const questionText = String(question.question ?? "")
+  const haystack = `${answerText} ${questionText}`.toLowerCase().trim()
 
-  const hasMultipleCorrectAnswers =
-    normalized.includes("đều đúng") ||
-    normalized.includes("đều sai") ||
-    normalized.includes("là đúng") ||
-    normalized.includes("là sai") ||
-    normalized.includes("cả") ||
-    normalized.includes("và")
+  const shouldKeepOriginalOrder =
+    /đều (đúng|sai)/.test(haystack) ||
+    /là (đúng|sai)/.test(haystack) ||
+    /tất cả (các )?phương án/.test(haystack) ||
+    /mọi phương án/.test(haystack) ||
+    /phương án trên/.test(haystack)
 
-  return !hasMultipleCorrectAnswers
+  return !shouldKeepOriginalOrder
 }
 
 function getQuestionsForScope(questions: Question[], scope: QuestionScope): Question[] {
