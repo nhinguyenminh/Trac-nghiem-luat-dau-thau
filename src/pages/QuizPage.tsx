@@ -244,18 +244,20 @@ export default function QuizPage() {
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={() => setShowSettings((value) => !value)}
-            className="mb-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-800"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm"
           >
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-ms-blue-soft text-ms-blue-dark">
               {showSettings ? "−" : "+"}
             </span>
-            Cài đặt
+            Thiết lập
           </button>
+        </div>
 
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           {showSettings && (
             <div id="settings" className="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
               <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
