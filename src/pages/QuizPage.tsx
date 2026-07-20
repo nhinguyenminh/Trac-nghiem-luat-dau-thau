@@ -20,7 +20,30 @@ interface StoredAttempt {
   question?: Question
 }
 
+function shouldShuffleOptions(question: Question): boolean {
+  const answerText = String(question.options[question.answer] ?? "")
+  const normalized = answerText.toLowerCase().trim()
+
+  const hasMultipleCorrectAnswers =
+    normalized.includes("đều đúng") ||
+    normalized.includes("đều sai") ||
+    normalized.includes("là đúng") ||
+    normalized.includes("là sai") ||
+    normalized.includes("cả") ||
+    normalized.includes("và")
+
+  return !hasMultipleCorrectAnswers
+}
+
 function shuffleQuestion(question: Question): Question {
+  if (!shouldShuffleOptions(question)) {
+    return {
+      ...question,
+      answer: question.answer,
+      optionOrder: [...Array(question.options.length).keys()],
+    }
+  }
+
   const optionOrder = [...Array(question.options.length).keys()]
   for (let i = optionOrder.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
