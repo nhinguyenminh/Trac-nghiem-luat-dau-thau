@@ -237,6 +237,7 @@ export default function QuizPage() {
   const shownSelected = reviewing && activeAttempt ? activeAttempt.selected : selected
   const shownLocked = reviewing ? true : locked
   const isCorrect = shownSelected !== null && shownSelected === shownQuestion.answer
+  const shouldShowNextButton = settings.showNextButton && !settings.autoNext
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -282,17 +283,24 @@ export default function QuizPage() {
               <input
                 type="checkbox"
                 checked={settings.autoNext}
-                onChange={() => toggle("autoNext")}
+                onChange={() => {
+                  const nextValue = !settings.autoNext
+                  setValue("autoNext", nextValue)
+                  if (nextValue) {
+                    setValue("showNextButton", false)
+                  }
+                }}
                 className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
               />
               Tự động chuyển câu sau 3 giây
             </label>
-            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+            <label className={`flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm ${settings.autoNext ? "text-slate-400" : "text-slate-700"}`}>
               <input
                 type="checkbox"
                 checked={settings.showNextButton}
                 onChange={() => toggle("showNextButton")}
-                className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
+                disabled={settings.autoNext}
+                className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue disabled:cursor-not-allowed disabled:opacity-50"
               />
               Hiển thị nút chuyển câu
             </label>
@@ -383,7 +391,7 @@ export default function QuizPage() {
                 <span className="ml-1 text-slate-400">
                   {settings.autoNext
                     ? "· Tự động chuyển câu sau 3 giây..."
-                    : settings.showNextButton
+                    : shouldShowNextButton
                       ? "· Bấm nút chuyển câu để tiếp tục."
                       : "· Bạn có thể tiếp tục khi sẵn sàng."}
                 </span>
@@ -391,7 +399,7 @@ export default function QuizPage() {
             </div>
           )}
 
-          {!reviewing && shownLocked && settings.showNextButton && (
+          {!reviewing && shownLocked && shouldShowNextButton && (
             <div className="mt-4 flex justify-end">
               <button
                 onClick={goNext}
