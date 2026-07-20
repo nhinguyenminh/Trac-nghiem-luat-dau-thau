@@ -3,6 +3,7 @@ export interface Question {
   question: string
   options: string[]
   answer: number
+  optionOrder?: number[]
 }
 
 export interface Stats {

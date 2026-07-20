@@ -16,6 +16,22 @@ interface Attempt {
 interface StoredAttempt {
   id: number
   selected: number
+  question?: Question
+}
+
+function shuffleQuestion(question: Question): Question {
+  const optionOrder = [...Array(question.options.length).keys()]
+  for (let i = optionOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[optionOrder[i], optionOrder[j]] = [optionOrder[j], optionOrder[i]]
+  }
+
+  return {
+    ...question,
+    options: optionOrder.map((index) => question.options[index]),
+    answer: optionOrder.indexOf(question.answer),
+    optionOrder,
+  }
 }
 
 function readStoredAttempts(): StoredAttempt[] {
@@ -25,8 +41,12 @@ function readStoredAttempts(): StoredAttempt[] {
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
     return parsed
-      .filter((a) => Number.isInteger(a?.id) && Number.isInteger(a?.selected))
-      .map((a) => ({ id: a.id, selected: a.selected }))
+      .filter((a) => a && Number.isInteger(a?.id) && Number.isInteger(a?.selected))
+      .map((a) => ({
+        id: a.id,
+        selected: a.selected,
+        question: a.question && typeof a.question === "object" ? (a.question as Question) : undefined,
+      }))
   } catch {
     return []
   }
@@ -70,7 +90,10 @@ export default function QuizPage() {
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
-    setCurrent((prev) => pickRandom(questions, prev?.id))
+    setCurrent((prev) => {
+      const nextQuestion = pickRandom(questions, prev?.id)
+      return nextQuestion ? shuffleQuestion(nextQuestion) : null
+    })
   }, [questions, pickRandom, clearTimer])
 
   useEffect(() => {
@@ -80,14 +103,18 @@ export default function QuizPage() {
         return res.json()
       })
       .then((data: Question[]) => {
-        setQuestions(data)
-        setCurrent(data[Math.floor(Math.random() * data.length)] ?? null)
+        const rawQuestions = data.map((question) => ({ ...question }))
+        setQuestions(rawQuestions)
+        const firstQuestion = rawQuestions[Math.floor(Math.random() * rawQuestions.length)] ?? null
+        setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
         // rebuild session history from LocalStorage
-        const byId = new Map(data.map((q) => [q.id, q]))
+        const byId = new Map(rawQuestions.map((q) => [q.id, q]))
         const restored: Attempt[] = []
         for (const a of readStoredAttempts()) {
           const q = byId.get(a.id)
-          if (q && a.selected < q.options.length) restored.push({ question: q, selected: a.selected })
+          if (!q) continue
+          const restoredQuestion = a.question ? { ...a.question } : shuffleQuestion(q)
+          if (a.selected < restoredQuestion.options.length) restored.push({ question: restoredQuestion, selected: a.selected })
         }
         setHistory(restored)
         setLoading(false)
@@ -101,7 +128,7 @@ export default function QuizPage() {
   // persist attempts whenever history changes
   useEffect(() => {
     if (loading) return
-    const stored: StoredAttempt[] = history.map((a) => ({ id: a.question.id, selected: a.selected }))
+    const stored: StoredAttempt[] = history.map((a) => ({ id: a.question.id, selected: a.selected, question: a.question }))
     localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(stored))
   }, [history, loading])
 
@@ -129,7 +156,10 @@ export default function QuizPage() {
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
-    setCurrent((prev) => pickRandom(questions, prev?.id))
+    setCurrent((prev) => {
+      const nextQuestion = pickRandom(questions, prev?.id)
+      return nextQuestion ? shuffleQuestion(nextQuestion) : null
+    })
   }
 
   if (loading) {
