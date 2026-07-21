@@ -27,9 +27,9 @@ function normalizeText(value: string): string {
 }
 
 function shouldShuffleOptions(question: Question): boolean {
+  const text = normalizeText(`${question.question} ${question.options.join(" ")}`)
   const answerText = normalizeText(question.options[question.answer] ?? "")
-  const questionText = normalizeText(question.question ?? "")
-  const haystack = `${answerText} ${questionText}`
+  const haystack = `${text} ${answerText}`
 
   const shouldKeepOriginalOrder =
     /đều\s+(đúng|sai)/.test(haystack) ||
