@@ -16,7 +16,7 @@ for row in ws.iter_rows(min_row=2, values_only=True):
     if not any(cell is not None and str(cell).strip() for cell in row):
         continue
 
-    stt, question, options_text, answer = row[0], row[1], row[2], row[3]
+    stt, category, question, options_text, answer = row[0], row[1], row[2], row[3], row[4]
     if stt is None:
         continue
 
@@ -39,6 +39,7 @@ for row in ws.iter_rows(min_row=2, values_only=True):
 
     questions.append({
         "id": int(stt),
+        "category": str(category).strip() if category is not None else "",
         "question": str(question).strip(),
         "options": options,
         "answer": answer_index,

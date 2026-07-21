@@ -6,6 +6,7 @@ export interface Settings {
   showNextButton: boolean
   allowRepeat: boolean
   questionScope: QuestionScope
+  selectedCategories: string[]
 }
 
 const STORAGE_KEY = "quiz-settings-v1"
@@ -15,6 +16,7 @@ const defaultSettings: Settings = {
   showNextButton: true,
   allowRepeat: true,
   questionScope: "all",
+  selectedCategories: [],
 }
 
 function readSettings(): Settings {
@@ -22,6 +24,10 @@ function readSettings(): Settings {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultSettings
     const parsed = JSON.parse(raw) as Partial<Settings>
+    const selectedCategories = Array.isArray(parsed.selectedCategories)
+      ? parsed.selectedCategories.filter((value): value is string => typeof value === "string")
+      : []
+
     return {
       autoNext: typeof parsed.autoNext === "boolean" ? parsed.autoNext : defaultSettings.autoNext,
       showNextButton: typeof parsed.showNextButton === "boolean" ? parsed.showNextButton : defaultSettings.showNextButton,
@@ -30,6 +36,7 @@ function readSettings(): Settings {
         parsed.questionScope === "first200" || parsed.questionScope === "after200"
           ? parsed.questionScope
           : defaultSettings.questionScope,
+      selectedCategories,
     }
   } catch {
     return defaultSettings
@@ -58,5 +65,15 @@ export function useSettings() {
     setSettings((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  return { settings, toggle, setValue }
+  const toggleCategory = useCallback((category: string) => {
+    setSettings((prev) => {
+      const nextCategories = prev.selectedCategories.includes(category)
+        ? prev.selectedCategories.filter((value) => value !== category)
+        : [...prev.selectedCategories, category]
+
+      return { ...prev, selectedCategories: nextCategories }
+    })
+  }, [])
+
+  return { settings, toggle, setValue, toggleCategory }
 }
