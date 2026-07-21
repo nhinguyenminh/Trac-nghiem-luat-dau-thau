@@ -260,6 +260,16 @@ export default function QuizPage() {
   const shownLocked = reviewing ? true : locked
   const isCorrect = shownSelected !== null && shownSelected === shownQuestion.answer
   const shouldShowNextButton = settings.showNextButton && !settings.autoNext
+  const isAllCategoriesSelected = availableCategories.length > 0 && settings.selectedCategories.length === availableCategories.length
+
+  const handleToggleAllCategories = () => {
+    if (isAllCategoriesSelected) {
+      setValue("selectedCategories", [])
+      return
+    }
+
+    setValue("selectedCategories", availableCategories)
+  }
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -315,28 +325,6 @@ export default function QuizPage() {
                 </label>
               </div>
 
-              {availableCategories.length > 0 && (
-                <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700">
-                  <p className="mb-2 font-medium text-slate-800">Hạng mục cần ôn</p>
-                  <div className="flex flex-wrap gap-2">
-                    {availableCategories.map((category) => {
-                      const checked = settings.selectedCategories.includes(category)
-                      return (
-                        <label key={category} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggleCategory(category)}
-                            className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
-                          />
-                          <span>{category}</span>
-                        </label>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
               <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700">
                 <p className="mb-2 font-medium text-slate-800">Chế độ chuyển câu</p>
                 <div className="flex flex-col gap-2">
@@ -368,6 +356,37 @@ export default function QuizPage() {
                   </label>
                 </div>
               </div>
+
+              {availableCategories.length > 0 && (
+                <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700">
+                  <p className="mb-2 font-medium text-slate-800">Hạng mục cần ôn</p>
+                  <label className="mb-3 flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
+                    <input
+                      type="checkbox"
+                      checked={isAllCategoriesSelected}
+                      onChange={handleToggleAllCategories}
+                      className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
+                    />
+                    <span>Tất cả hạng mục</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableCategories.map((category) => {
+                      const checked = settings.selectedCategories.includes(category)
+                      return (
+                        <label key={category} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleCategory(category)}
+                            className="h-4 w-4 rounded border-slate-300 text-ms-blue focus:ring-ms-blue"
+                          />
+                          <span>{category}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -507,37 +526,6 @@ export default function QuizPage() {
             </div>
           )}
         </div>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-800">Danh sách câu hỏi</h3>
-            <span className="text-xs font-medium text-slate-500">{questions.length} câu</span>
-          </div>
-          <div className="max-h-[28rem] overflow-x-auto overflow-y-auto rounded-xl border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                <tr>
-                  <th className="px-3 py-2">STT</th>
-                  <th className="px-3 py-2">Hạng mục</th>
-                  <th className="px-3 py-2">Nội dung câu hỏi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
-                {questions.slice(0, 80).map((question) => (
-                  <tr key={question.id} className="align-top hover:bg-slate-50">
-                    <td className="whitespace-nowrap px-3 py-2 font-semibold text-slate-500">{question.id}</td>
-                    <td className="min-w-[12rem] px-3 py-2">
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                        {question.category || "Chung"}
-                      </span>
-                    </td>
-                    <td className="max-w-[32rem] px-3 py-2 text-sm leading-relaxed">{question.question}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
 
         <section>
           <h3 className="mb-3 text-base font-semibold text-slate-800">Thống kê</h3>

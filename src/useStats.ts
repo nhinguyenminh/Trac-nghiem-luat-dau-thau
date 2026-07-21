@@ -6,26 +6,17 @@ export const ATTEMPTS_KEY = "quiz-attempts-v1"
 
 const emptyStats: Stats = { total: 0, correct: 0, wrong: 0 }
 
-function readStats(): Stats {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return emptyStats
-    const parsed = JSON.parse(raw) as Partial<Stats>
-    return {
-      total: Number(parsed.total) || 0,
-      correct: Number(parsed.correct) || 0,
-      wrong: Number(parsed.wrong) || 0,
-    }
-  } catch {
-    return emptyStats
-  }
+function resetSessionStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(emptyStats))
+  localStorage.removeItem(ATTEMPTS_KEY)
 }
 
 export function useStats() {
   const [stats, setStats] = useState<Stats>(emptyStats)
 
   useEffect(() => {
-    setStats(readStats())
+    resetSessionStorage()
+    setStats(emptyStats)
   }, [])
 
   useEffect(() => {
@@ -41,9 +32,8 @@ export function useStats() {
   }, [])
 
   const reset = useCallback(() => {
+    resetSessionStorage()
     setStats(emptyStats)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(emptyStats))
-    localStorage.removeItem(ATTEMPTS_KEY)
   }, [])
 
   const accuracy = stats.total === 0 ? 0 : Math.round((stats.correct / stats.total) * 100)
