@@ -34,6 +34,7 @@ function shouldShuffleOptions(question: Question): boolean {
   const shouldKeepOriginalOrder =
     /đều\s+(đúng|sai)/.test(haystack) ||
     /là\s+(đúng|sai)/.test(haystack) ||
+    /\b(đáp\s+án|phương\s+án|các\s+phương\s+án|tất\s+cả\s+phương\s+án|tất\s+cả\s+các\s+phương\s+án)\b[^\n]*\b(và|,|\/)\b/.test(haystack) ||
     /tất\s+cả\s+(các\s+)?phương\s+án/.test(haystack) ||
     /mọi\s+phương\s+án/.test(haystack) ||
     /phương\s+án\s+trên/.test(haystack) ||
@@ -80,6 +81,27 @@ function shuffleQuestion(question: Question): Question {
   }
 }
 
+function shuffleArray<T>(items: T[]): T[] {
+  const result = [...items]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
+function buildQuestionQueue(sourceQuestions: Question[], previousQuestionId?: number): Question[] {
+  const shuffled = shuffleArray(sourceQuestions)
+  if (previousQuestionId == null || shuffled.length <= 1) return shuffled
+
+  const firstDifferentIndex = shuffled.findIndex((question) => question.id !== previousQuestionId)
+  if (firstDifferentIndex <= 0) return shuffled
+
+  const [firstDifferentQuestion] = shuffled.splice(firstDifferentIndex, 1)
+  shuffled.unshift(firstDifferentQuestion)
+  return shuffled
+}
+
 function readStoredAttempts(): StoredAttempt[] {
   try {
     const raw = localStorage.getItem(ATTEMPTS_KEY)
@@ -117,6 +139,7 @@ export default function QuizPage() {
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const questionQueueRef = useRef<Question[]>([])
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -125,14 +148,17 @@ export default function QuizPage() {
     }
   }, [])
 
-  const pickRandom = useCallback((list: Question[], previousId?: number) => {
-    if (list.length === 0) return null
-    if (list.length === 1) return list[0]
-    let next = list[Math.floor(Math.random() * list.length)]
-    while (next.id === previousId) {
-      next = list[Math.floor(Math.random() * list.length)]
+  const initializeQuestions = useCallback((sourceQuestions: Question[]) => {
+    if (sourceQuestions.length === 0) {
+      questionQueueRef.current = []
+      setCurrent(null)
+      return
     }
-    return next
+
+    const queue = buildQuestionQueue(sourceQuestions)
+    const firstQuestion = queue[0] ?? null
+    questionQueueRef.current = firstQuestion ? queue.slice(1) : []
+    setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
   }, [])
 
   const goNext = useCallback(() => {
@@ -140,11 +166,12 @@ export default function QuizPage() {
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
-    setCurrent((prev) => {
-      const nextQuestion = pickRandom(questions, prev?.id)
-      return nextQuestion ? shuffleQuestion(nextQuestion) : null
-    })
-  }, [questions, pickRandom, clearTimer])
+
+    const queue = questionQueueRef.current.length > 0 ? questionQueueRef.current : buildQuestionQueue(questions, current?.id)
+    const nextQuestion = queue[0] ?? null
+    questionQueueRef.current = nextQuestion ? queue.slice(1) : []
+    setCurrent(nextQuestion ? shuffleQuestion(nextQuestion) : null)
+  }, [questions, current?.id, clearTimer])
 
   useEffect(() => {
     fetch("/questions.json")
@@ -160,8 +187,7 @@ export default function QuizPage() {
         const scopedQuestions = getQuestionsForScope(rawQuestions, settings.questionScope)
         const filteredQuestions = getQuestionsForCategories(scopedQuestions, settings.selectedCategories)
         setQuestions(filteredQuestions)
-        const firstQuestion = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)] ?? null
-        setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
+        initializeQuestions(filteredQuestions)
         // rebuild session history from LocalStorage
         const byId = new Map(rawQuestions.map((q) => [q.id, q]))
         const restored: Attempt[] = []
@@ -189,11 +215,8 @@ export default function QuizPage() {
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
-    setCurrent((prev) => {
-      const nextQuestion = pickRandom(filteredQuestions, prev?.id)
-      return nextQuestion ? shuffleQuestion(nextQuestion) : null
-    })
-  }, [allQuestions, settings.questionScope, settings.selectedCategories, pickRandom])
+    initializeQuestions(filteredQuestions)
+  }, [allQuestions, settings.questionScope, settings.selectedCategories, initializeQuestions])
 
   // persist attempts whenever history changes
   useEffect(() => {
@@ -228,10 +251,7 @@ export default function QuizPage() {
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
-    setCurrent((prev) => {
-      const nextQuestion = pickRandom(questions, prev?.id)
-      return nextQuestion ? shuffleQuestion(nextQuestion) : null
-    })
+    initializeQuestions(questions)
   }
 
   if (loading) {
