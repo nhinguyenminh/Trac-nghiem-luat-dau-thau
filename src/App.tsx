@@ -1,5 +1,6 @@
 import { Routes, Route, Link, useLocation } from "react-router-dom"
 import { GraduationCap } from "lucide-react"
+import { Analytics } from "@vercel/analytics/react"
 import HomePage from "./pages/HomePage"
 import QuizPage from "./pages/QuizPage"
 
@@ -56,6 +57,7 @@ export default function App() {
       <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-500">
         Ứng dụng luyện thi chứng chỉ đấu thầu &middot; Làm bài không giới hạn
       </footer>
+      <Analytics />
     </div>
   )
 }
