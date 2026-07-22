@@ -618,6 +618,9 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
           )}
         </div>
 
+        {/* Main column wrapper closing tag */}
+      </div>
+
       {/* Navigator / review grid */}
       <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:w-72 lg:flex-shrink-0">
         <div className="mb-3 flex items-center justify-between">
