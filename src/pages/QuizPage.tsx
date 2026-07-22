@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useLocation } from "react-router-dom"
 import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { ATTEMPTS_KEY, useStats } from "../useStats"
 import { useSettings } from "../useSettings"
@@ -126,6 +127,7 @@ function readStoredAttempts(): StoredAttempt[] {
 }
 
 export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
+  const location = useLocation()
   const { stats, accuracy, record, reset } = useStats()
   const { settings, setValue, toggleCategory } = useSettings()
 
@@ -138,7 +140,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const [current, setCurrent] = useState<Question | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const [locked, setLocked] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
+  const [showSettings, setShowSettings] = useState(() => (typeof window !== "undefined" ? window.location.hash === "#settings" : false))
 
   const [history, setHistory] = useState<Attempt[]>([])
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
@@ -246,6 +248,18 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
   useEffect(() => clearTimer, [clearTimer])
 
+  useEffect(() => {
+    const shouldShow = location.hash === "#settings"
+    setShowSettings(shouldShow)
+
+    if (shouldShow) {
+      window.requestAnimationFrame(() => {
+        const settingsElement = document.getElementById("settings")
+        settingsElement?.scrollIntoView({ behavior: "smooth", block: "start" })
+      })
+    }
+  }, [location.hash])
+
   const handleSelect = (index: number) => {
     if (reviewIndex !== null || locked || !current) return
     setSelected(index)
@@ -323,7 +337,16 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
         <div className="flex justify-end">
           <button
             type="button"
-            onClick={() => setShowSettings((value) => !value)}
+            onClick={() => {
+              const nextValue = !showSettings
+              setShowSettings(nextValue)
+
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href)
+                url.hash = nextValue ? "settings" : ""
+                window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`)
+              }
+            }}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm"
           >
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-ms-blue-soft text-ms-blue-dark">
