@@ -51,8 +51,12 @@ function shouldShuffleOptions(question: Question): boolean {
 
 function getQuestionsForScope(questions: Question[], scope: QuestionScope): Question[] {
   const sorted = [...questions].sort((a, b) => a.id - b.id)
-  if (scope === "first200") return sorted.slice(0, 200)
-  if (scope === "after200") return sorted.slice(200)
+  const baseQuestions = sorted.filter((question) => question.id <= 390)
+  const supplementQuestions = sorted.filter((question) => question.id > 390)
+
+  if (scope === "first200") return baseQuestions.slice(0, 200)
+  if (scope === "after200") return baseQuestions.slice(200)
+  if (scope === "supplement50") return supplementQuestions.slice(0, 50)
   return sorted
 }
 
@@ -379,7 +383,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
                     onChange={() => setValue("questionScope", "first200")}
                     className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
                   />
-                  200 câu đầu
+                  200 câu đầu (bộ 390)
                 </label>
                 <label className="flex items-center gap-1">
                   <input
@@ -389,7 +393,17 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
                     onChange={() => setValue("questionScope", "after200")}
                     className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
                   />
-                  200 câu sau
+                  200 câu sau (bộ 390)
+                </label>
+                <label className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="questionScope"
+                    checked={settings.questionScope === "supplement50"}
+                    onChange={() => setValue("questionScope", "supplement50")}
+                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                  />
+                  50 câu bộ bổ sung
                 </label>
               </div>
 
@@ -458,147 +472,151 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
             </div>
           )}
 
-          <div className="mb-4 flex items-center justify-between">
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                reviewing ? "bg-slate-100 text-slate-600" : "bg-ms-blue-soft text-ms-blue-dark"
-              }`}
-            >
-              {reviewing ? `Xem lại · Câu số ${reviewIndex + 1}` : "Câu hỏi ngẫu nhiên"}
-            </span>
-            {shownLocked && (
-              <span
-                className={`flex items-center gap-1 text-sm font-semibold ${
-                  isCorrect ? "text-ms-green" : "text-ms-red"
-                }`}
-              >
-                {isCorrect ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" /> Chính xác!
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="h-4 w-4" /> Chưa đúng
-                  </>
-                )}
-              </span>
-            )}
-          </div>
-
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              {shownQuestion.category ?? "Chung"}
-            </span>
-            <span className="text-xs text-slate-500">STT {shownQuestion.id}</span>
-          </div>
-
-          <h2 className="text-pretty text-lg font-semibold leading-relaxed text-slate-800 sm:text-xl">
-            {shownQuestion.question}
-          </h2>
-
-          <div className="mt-5 flex flex-col gap-3">
-            {shownQuestion.options.map((option, index) => {
-              const isAnswer = index === shownQuestion.answer
-              const isPicked = index === shownSelected
-
-              let styles = "border-slate-200 bg-white hover:border-ms-blue hover:bg-ms-blue-light"
-              if (shownLocked) {
-                if (isAnswer) {
-                  styles = "border-ms-green bg-ms-green-light text-slate-800"
-                } else if (isPicked) {
-                  styles = "border-ms-red bg-ms-red-light text-slate-800"
-                } else {
-                  styles = "border-slate-200 bg-white opacity-70"
-                }
-              }
-
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleSelect(index)}
-                  disabled={shownLocked}
-                  className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm transition-all sm:text-base ${styles} ${
-                    shownLocked ? "cursor-default" : "cursor-pointer"
+          {!showSettings && (
+            <>
+              <div className="mb-4 flex items-center justify-between">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    reviewing ? "bg-slate-100 text-slate-600" : "bg-ms-blue-soft text-ms-blue-dark"
                   }`}
                 >
+                  {reviewing ? `Xem lại · Câu số ${reviewIndex + 1}` : "Câu hỏi ngẫu nhiên"}
+                </span>
+                {shownLocked && (
                   <span
-                    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                      shownLocked && isAnswer
-                        ? "bg-ms-green text-white"
-                        : shownLocked && isPicked
-                          ? "bg-ms-red text-white"
-                          : "bg-ms-blue-soft text-ms-blue-dark"
+                    className={`flex items-center gap-1 text-sm font-semibold ${
+                      isCorrect ? "text-ms-green" : "text-ms-red"
                     }`}
                   >
-                    {LETTERS[index]}
+                    {isCorrect ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4" /> Chính xác!
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-4 w-4" /> Chưa đúng
+                      </>
+                    )}
                   </span>
-                  <span className="flex-1">{option}</span>
-                  {shownLocked && isAnswer && <CheckCircle2 className="h-5 w-5 text-ms-green" />}
-                  {shownLocked && isPicked && !isAnswer && <XCircle className="h-5 w-5 text-ms-red" />}
-                </button>
-              )
-            })}
-          </div>
+                )}
+              </div>
 
-          {shownLocked && (
-            <div className="mt-4 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
-              Đáp án đúng:{" "}
-              <span className="font-semibold text-ms-green">
-                {LETTERS[shownQuestion.answer]}. {shownQuestion.options[shownQuestion.answer]}
-              </span>
-              {!reviewing && (
-                <span className="ml-1 text-slate-400">
-                  {settings.autoNext
-                    ? "· Tự động chuyển câu sau 3 giây..."
-                    : shouldShowNextButton
-                      ? "· Bấm nút chuyển câu để tiếp tục."
-                      : "· Bạn có thể tiếp tục khi sẵn sàng."}
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  {shownQuestion.category ?? "Chung"}
                 </span>
+                <span className="text-xs text-slate-500">STT {shownQuestion.id}</span>
+              </div>
+
+              <h2 className="text-pretty text-lg font-semibold leading-relaxed text-slate-800 sm:text-xl">
+                {shownQuestion.question}
+              </h2>
+
+              <div className="mt-5 flex flex-col gap-3">
+                {shownQuestion.options.map((option, index) => {
+                  const isAnswer = index === shownQuestion.answer
+                  const isPicked = index === shownSelected
+
+                  let styles = "border-slate-200 bg-white hover:border-ms-blue hover:bg-ms-blue-light"
+                  if (shownLocked) {
+                    if (isAnswer) {
+                      styles = "border-ms-green bg-ms-green-light text-slate-800"
+                    } else if (isPicked) {
+                      styles = "border-ms-red bg-ms-red-light text-slate-800"
+                    } else {
+                      styles = "border-slate-200 bg-white opacity-70"
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleSelect(index)}
+                      disabled={shownLocked}
+                      className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm transition-all sm:text-base ${styles} ${
+                        shownLocked ? "cursor-default" : "cursor-pointer"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                          shownLocked && isAnswer
+                            ? "bg-ms-green text-white"
+                            : shownLocked && isPicked
+                              ? "bg-ms-red text-white"
+                              : "bg-ms-blue-soft text-ms-blue-dark"
+                        }`}
+                      >
+                        {LETTERS[index]}
+                      </span>
+                      <span className="flex-1">{option}</span>
+                      {shownLocked && isAnswer && <CheckCircle2 className="h-5 w-5 text-ms-green" />}
+                      {shownLocked && isPicked && !isAnswer && <XCircle className="h-5 w-5 text-ms-red" />}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {shownLocked && (
+                <div className="mt-4 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
+                  Đáp án đúng:{" "}
+                  <span className="font-semibold text-ms-green">
+                    {LETTERS[shownQuestion.answer]}. {shownQuestion.options[shownQuestion.answer]}
+                  </span>
+                  {!reviewing && (
+                    <span className="ml-1 text-slate-400">
+                      {settings.autoNext
+                        ? "· Tự động chuyển câu sau 3 giây..."
+                        : shouldShowNextButton
+                          ? "· Bấm nút chuyển câu để tiếp tục."
+                          : "· Bạn có thể tiếp tục khi sẵn sàng."}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {!reviewing && shownLocked && shouldShowNextButton && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={goNext}
+                    className="inline-flex items-center gap-2 rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ms-blue-dark"
+                  >
+                    <Play className="h-4 w-4" /> Câu tiếp theo
+                  </button>
+                </div>
+              )}
+
+              {reviewing && (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setReviewIndex(Math.max(0, reviewIndex - 1))}
+                    disabled={reviewIndex === 0}
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronLeft className="h-4 w-4" /> Câu trước
+                  </button>
+                  <button
+                    onClick={() => setReviewIndex(Math.min(history.length - 1, reviewIndex + 1))}
+                    disabled={reviewIndex >= history.length - 1}
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Câu sau <ChevronRight className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={goNext}
+                    className="ml-auto flex items-center gap-1 rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ms-blue-dark"
+                  >
+                    <Play className="h-4 w-4" /> Tiếp tục làm bài
+                  </button>
+                </div>
               )}
             </div>
-          )}
 
-          {!reviewing && shownLocked && shouldShowNextButton && (
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={goNext}
-                className="inline-flex items-center gap-2 rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ms-blue-dark"
-              >
-                <Play className="h-4 w-4" /> Câu tiếp theo
-              </button>
-            </div>
+            <section>
+              <h3 className="mb-3 text-base font-semibold text-slate-800">Thống kê</h3>
+              <StatsPanel stats={stats} accuracy={accuracy} onReset={handleReset} />
+            </section>
+            </>
           )}
-
-          {reviewing && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setReviewIndex(Math.max(0, reviewIndex - 1))}
-                disabled={reviewIndex === 0}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <ChevronLeft className="h-4 w-4" /> Câu trước
-              </button>
-              <button
-                onClick={() => setReviewIndex(Math.min(history.length - 1, reviewIndex + 1))}
-                disabled={reviewIndex >= history.length - 1}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Câu sau <ChevronRight className="h-4 w-4" />
-              </button>
-              <button
-                onClick={goNext}
-                className="ml-auto flex items-center gap-1 rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ms-blue-dark"
-              >
-                <Play className="h-4 w-4" /> Tiếp tục làm bài
-              </button>
-            </div>
-          )}
-        </div>
-
-        <section>
-          <h3 className="mb-3 text-base font-semibold text-slate-800">Thống kê</h3>
-          <StatsPanel stats={stats} accuracy={accuracy} onReset={handleReset} />
-        </section>
       </div>
 
       {/* Navigator / review grid */}

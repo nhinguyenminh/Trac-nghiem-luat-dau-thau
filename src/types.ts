@@ -1,4 +1,4 @@
-export type QuestionScope = "all" | "first200" | "after200"
+export type QuestionScope = "all" | "first200" | "after200" | "supplement50"
 
 export interface Question {
   id: number

@@ -3,47 +3,58 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 ROOT = Path(__file__).resolve().parent.parent
-INPUT_PATH = ROOT / "data" / "Ngan-Hang-Cau-Hoi.xlsx"
+INPUT_FILES = [
+    ROOT / "data" / "390-cau-hoi-luat-dau-thau.xlsx",
+    ROOT / "data" / "50-cau-bo-sung.xlsx",
+]
 OUTPUT_PATH = ROOT / "public" / "questions.json"
 
 answer_map = {"A": 0, "B": 1, "C": 2, "D": 3}
 
-wb = load_workbook(INPUT_PATH, data_only=True)
-ws = wb.active
-
 questions = []
-for row in ws.iter_rows(min_row=2, values_only=True):
-    if not any(cell is not None and str(cell).strip() for cell in row):
+next_id = 1
+
+for input_path in INPUT_FILES:
+    if not input_path.exists():
+        print(f"Skipping missing file: {input_path}")
         continue
 
-    stt, category, question, options_text, answer = row[0], row[1], row[2], row[3], row[4]
-    if stt is None:
-        continue
+    wb = load_workbook(input_path, data_only=True)
+    ws = wb.active
 
-    options = []
-    if isinstance(options_text, str):
-        for line in options_text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            if line and line[0].upper() in answer_map:
-                line = line[2:].strip() if len(line) > 2 else ""
-            options.append(line)
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if not any(cell is not None and str(cell).strip() for cell in row):
+            continue
 
-    if not options:
-        continue
+        _, category, question, options_text, answer = row[0], row[1], row[2], row[3], row[4]
+        if row[0] is None:
+            continue
 
-    answer_index = answer_map.get(str(answer).strip().upper())
-    if answer_index is None:
-        answer_index = 0
+        options = []
+        if isinstance(options_text, str):
+            for line in options_text.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                if line and line[0].upper() in answer_map:
+                    line = line[2:].strip() if len(line) > 2 else ""
+                options.append(line)
 
-    questions.append({
-        "id": int(stt),
-        "category": str(category).strip() if category is not None else "",
-        "question": str(question).strip(),
-        "options": options,
-        "answer": answer_index,
-    })
+        if not options:
+            continue
+
+        answer_index = answer_map.get(str(answer).strip().upper())
+        if answer_index is None:
+            answer_index = 0
+
+        questions.append({
+            "id": next_id,
+            "category": str(category).strip() if category is not None else "",
+            "question": str(question).strip(),
+            "options": options,
+            "answer": answer_index,
+        })
+        next_id += 1
 
 OUTPUT_PATH.write_text(json.dumps(questions, ensure_ascii=False, indent=2), encoding="utf-8")
 print(f"Wrote {len(questions)} questions to {OUTPUT_PATH}")

@@ -33,7 +33,7 @@ function readSettings(): Settings {
       showNextButton: typeof parsed.showNextButton === "boolean" ? parsed.showNextButton : defaultSettings.showNextButton,
       allowRepeat: typeof parsed.allowRepeat === "boolean" ? parsed.allowRepeat : defaultSettings.allowRepeat,
       questionScope:
-        parsed.questionScope === "first200" || parsed.questionScope === "after200"
+        parsed.questionScope === "first200" || parsed.questionScope === "after200" || parsed.questionScope === "supplement50"
           ? parsed.questionScope
           : defaultSettings.questionScope,
       selectedCategories,
