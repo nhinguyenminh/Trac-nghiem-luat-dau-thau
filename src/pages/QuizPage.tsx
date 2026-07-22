@@ -617,7 +617,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
             </section>
             </>
           )}
-      </div>
+        </div>
 
       {/* Navigator / review grid */}
       <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:w-72 lg:flex-shrink-0">
