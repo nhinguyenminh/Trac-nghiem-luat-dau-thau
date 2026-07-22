@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { ATTEMPTS_KEY, useStats } from "../useStats"
@@ -68,6 +68,15 @@ function getQuestionsForCategories(questions: Question[], selectedCategories: st
   })
 }
 
+function getFilteredQuestions(questions: Question[], scope: QuestionScope, selectedCategories: string[]): Question[] {
+  const scopedQuestions = getQuestionsForScope(questions, scope)
+  return getQuestionsForCategories(scopedQuestions, selectedCategories)
+}
+
+function getQuestionCategories(questions: Question[]): string[] {
+  return Array.from(new Set(questions.map((question) => (question.category ?? "").trim()).filter(Boolean))).sort()
+}
+
 function shuffleQuestion(question: Question): Question {
   if (!shouldShuffleOptions(question)) {
     return {
@@ -130,6 +139,23 @@ function readStoredAttempts(): StoredAttempt[] {
   }
 }
 
+function restoreAttempts(rawQuestions: Question[], storedAttempts: StoredAttempt[]): Attempt[] {
+  const byId = new Map(rawQuestions.map((question) => [question.id, question]))
+  const restored: Attempt[] = []
+
+  for (const attempt of storedAttempts) {
+    const question = byId.get(attempt.id)
+    if (!question) continue
+
+    const restoredQuestion = attempt.question ? { ...attempt.question } : shuffleQuestion(question)
+    if (attempt.selected < restoredQuestion.options.length) {
+      restored.push({ question: restoredQuestion, selected: attempt.selected })
+    }
+  }
+
+  return restored
+}
+
 export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const location = useLocation()
   const { stats, accuracy, record, reset } = useStats()
@@ -139,7 +165,6 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [availableCategories, setAvailableCategories] = useState<string[]>([])
 
   const [current, setCurrent] = useState<Question | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
@@ -152,6 +177,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const questionQueueRef = useRef<Question[]>([])
+  const hasLoadedInitialQuestions = useRef(false)
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -172,6 +198,30 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     questionQueueRef.current = firstQuestion ? queue.slice(1) : []
     setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
   }, [])
+
+  const applyQuestionSelection = useCallback(
+    (rawQuestions: Question[], shouldResetHistory = true) => {
+      const filteredQuestions = getFilteredQuestions(rawQuestions, settings.questionScope, settings.selectedCategories)
+      setAllQuestions(rawQuestions)
+      setQuestions(filteredQuestions)
+
+      if (shouldResetHistory) {
+        setHistory([])
+        setReviewIndex(null)
+        setSelected(null)
+        setLocked(false)
+      }
+
+      if (practiceQuestionId != null) {
+        const practiceQuestion = filteredQuestions.find((question) => question.id === practiceQuestionId) ?? null
+        setCurrent(practiceQuestion ? shuffleQuestion(practiceQuestion) : null)
+        questionQueueRef.current = []
+      } else {
+        initializeQuestions(filteredQuestions)
+      }
+    },
+    [initializeQuestions, practiceQuestionId, settings.questionScope, settings.selectedCategories],
+  )
 
   const goNext = useCallback(() => {
     clearTimer()
@@ -194,54 +244,21 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
       })
       .then((data: Question[]) => {
         const rawQuestions = data.map((question) => ({ ...question }))
-        const categories = Array.from(new Set(rawQuestions.map((question) => (question.category ?? "").trim()).filter(Boolean))).sort()
-        setAvailableCategories(categories)
-        setAllQuestions(rawQuestions)
-        const scopedQuestions = getQuestionsForScope(rawQuestions, settings.questionScope)
-        const filteredQuestions = getQuestionsForCategories(scopedQuestions, settings.selectedCategories)
-        setQuestions(filteredQuestions)
-        if (practiceQuestionId != null) {
-          const practiceQuestion = filteredQuestions.find((question) => question.id === practiceQuestionId) ?? null
-          setCurrent(practiceQuestion ? shuffleQuestion(practiceQuestion) : null)
-          questionQueueRef.current = []
-        } else {
-          initializeQuestions(filteredQuestions)
-        }
-        // rebuild session history from LocalStorage
-        const byId = new Map(rawQuestions.map((q) => [q.id, q]))
-        const restored: Attempt[] = []
-        for (const a of readStoredAttempts()) {
-          const q = byId.get(a.id)
-          if (!q) continue
-          const restoredQuestion = a.question ? { ...a.question } : shuffleQuestion(q)
-          if (a.selected < restoredQuestion.options.length) restored.push({ question: restoredQuestion, selected: a.selected })
-        }
-        setHistory(restored)
+        applyQuestionSelection(rawQuestions, false)
+        setHistory(restoreAttempts(rawQuestions, readStoredAttempts()))
+        hasLoadedInitialQuestions.current = true
         setLoading(false)
       })
       .catch(() => {
         setError(true)
         setLoading(false)
       })
-  }, [])
+  }, [applyQuestionSelection])
 
   useEffect(() => {
-    if (allQuestions.length === 0) return
-    const scopedQuestions = getQuestionsForScope(allQuestions, settings.questionScope)
-    const filteredQuestions = getQuestionsForCategories(scopedQuestions, settings.selectedCategories)
-    setQuestions(filteredQuestions)
-    setHistory([])
-    setReviewIndex(null)
-    setSelected(null)
-    setLocked(false)
-    if (practiceQuestionId != null) {
-      const practiceQuestion = filteredQuestions.find((question) => question.id === practiceQuestionId) ?? null
-      setCurrent(practiceQuestion ? shuffleQuestion(practiceQuestion) : null)
-      questionQueueRef.current = []
-    } else {
-      initializeQuestions(filteredQuestions)
-    }
-  }, [allQuestions, settings.questionScope, settings.selectedCategories, initializeQuestions, practiceQuestionId])
+    if (allQuestions.length === 0 || !hasLoadedInitialQuestions.current) return
+    applyQuestionSelection(allQuestions, true)
+  }, [allQuestions, applyQuestionSelection])
 
   // persist attempts whenever history changes
   useEffect(() => {
@@ -323,6 +340,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const shownLocked = reviewing ? true : locked
   const isCorrect = shownSelected !== null && shownSelected === shownQuestion.answer
   const shouldShowNextButton = settings.showNextButton && !settings.autoNext
+  const availableCategories = useMemo(() => getQuestionCategories(allQuestions), [allQuestions])
   const isAllCategoriesSelected = availableCategories.length > 0 && settings.selectedCategories.length === availableCategories.length
 
   const handleToggleAllCategories = () => {
