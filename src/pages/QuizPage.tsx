@@ -3,7 +3,7 @@ import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRigh
 import { ATTEMPTS_KEY, useStats } from "../useStats"
 import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
-import { getQuestionProgress, readProgress, resetProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
+import { readProgress, resetProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
 import type { Question, QuestionProgress, QuestionScope } from "../types"
 
 const LETTERS = ["A", "B", "C", "D"]
@@ -142,7 +142,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
   const [history, setHistory] = useState<Attempt[]>([])
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
-  const [progress, setProgress] = useState<QuestionProgress[]>([])
+  const [, setProgress] = useState<QuestionProgress[]>([])
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const questionQueueRef = useRef<Question[]>([])
