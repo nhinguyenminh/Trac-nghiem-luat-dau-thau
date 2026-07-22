@@ -609,7 +609,6 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
                   </button>
                 </div>
               )}
-            </div>
 
             <section>
               <h3 className="mb-3 text-base font-semibold text-slate-800">Thống kê</h3>
