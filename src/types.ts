@@ -9,6 +9,17 @@ export interface Question {
   optionOrder?: number[]
 }
 
+export type QuestionProgressStatus = "unseen" | "correct" | "wrong"
+
+export interface QuestionProgress {
+  questionId: number
+  status: QuestionProgressStatus
+  correctCount: number
+  wrongCount: number
+  lastResult: "correct" | "wrong" | null
+  lastUpdated: Date | null
+}
+
 export interface Stats {
   total: number
   correct: number

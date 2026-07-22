@@ -3,10 +3,15 @@ import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRigh
 import { ATTEMPTS_KEY, useStats } from "../useStats"
 import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
-import type { Question, QuestionScope } from "../types"
+import { getQuestionProgress, readProgress, resetProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
+import type { Question, QuestionProgress, QuestionScope } from "../types"
 
 const LETTERS = ["A", "B", "C", "D"]
 const AUTO_NEXT_MS = 3000
+
+interface QuizPageProps {
+  practiceQuestionId?: number
+}
 
 interface Attempt {
   question: Question
@@ -120,7 +125,7 @@ function readStoredAttempts(): StoredAttempt[] {
   }
 }
 
-export default function QuizPage() {
+export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const { stats, accuracy, record, reset } = useStats()
   const { settings, setValue, toggleCategory } = useSettings()
 
@@ -137,6 +142,7 @@ export default function QuizPage() {
 
   const [history, setHistory] = useState<Attempt[]>([])
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
+  const [progress, setProgress] = useState<QuestionProgress[]>([])
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const questionQueueRef = useRef<Question[]>([])
@@ -174,6 +180,7 @@ export default function QuizPage() {
   }, [questions, current?.id, clearTimer])
 
   useEffect(() => {
+    setProgress(readProgress())
     fetch("/questions.json")
       .then((res) => {
         if (!res.ok) throw new Error("failed")
@@ -187,7 +194,13 @@ export default function QuizPage() {
         const scopedQuestions = getQuestionsForScope(rawQuestions, settings.questionScope)
         const filteredQuestions = getQuestionsForCategories(scopedQuestions, settings.selectedCategories)
         setQuestions(filteredQuestions)
-        initializeQuestions(filteredQuestions)
+        if (practiceQuestionId != null) {
+          const practiceQuestion = filteredQuestions.find((question) => question.id === practiceQuestionId) ?? null
+          setCurrent(practiceQuestion ? shuffleQuestion(practiceQuestion) : null)
+          questionQueueRef.current = []
+        } else {
+          initializeQuestions(filteredQuestions)
+        }
         // rebuild session history from LocalStorage
         const byId = new Map(rawQuestions.map((q) => [q.id, q]))
         const restored: Attempt[] = []
@@ -215,8 +228,14 @@ export default function QuizPage() {
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
-    initializeQuestions(filteredQuestions)
-  }, [allQuestions, settings.questionScope, settings.selectedCategories, initializeQuestions])
+    if (practiceQuestionId != null) {
+      const practiceQuestion = filteredQuestions.find((question) => question.id === practiceQuestionId) ?? null
+      setCurrent(practiceQuestion ? shuffleQuestion(practiceQuestion) : null)
+      questionQueueRef.current = []
+    } else {
+      initializeQuestions(filteredQuestions)
+    }
+  }, [allQuestions, settings.questionScope, settings.selectedCategories, initializeQuestions, practiceQuestionId])
 
   // persist attempts whenever history changes
   useEffect(() => {
@@ -233,6 +252,11 @@ export default function QuizPage() {
     setLocked(true)
     const correct = index === current.answer
     record(correct)
+    setProgress((prev) => {
+      const next = updateQuestionProgress(prev, current.id, correct)
+      writeProgress(next)
+      return next
+    })
     setHistory((prev) => [...prev, { question: current, selected: index }])
     if (settings.autoNext) {
       timerRef.current = setTimeout(goNext, AUTO_NEXT_MS)
@@ -247,6 +271,7 @@ export default function QuizPage() {
   const handleReset = () => {
     clearTimer()
     reset()
+    setProgress(resetProgress())
     setHistory([])
     setReviewIndex(null)
     setSelected(null)

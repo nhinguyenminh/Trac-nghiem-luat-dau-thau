@@ -2,6 +2,8 @@ import { Routes, Route, Link, useLocation } from "react-router-dom"
 import { GraduationCap } from "lucide-react"
 import { Analytics } from "@vercel/analytics/react"
 import HomePage from "./pages/HomePage"
+import ProfilePage from "./pages/ProfilePage"
+import PracticePage from "./pages/PracticePage"
 import QuizPage from "./pages/QuizPage"
 
 function Header() {
@@ -38,6 +40,14 @@ function Header() {
           >
             Luyện thi
           </Link>
+          <Link
+            to="/profile"
+            className={`rounded-md px-3 py-1.5 transition-colors ${
+              pathname === "/profile" ? "bg-white/20" : "hover:bg-white/10"
+            }`}
+          >
+            Hồ sơ
+          </Link>
         </nav>
       </div>
     </header>
@@ -52,6 +62,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/practice/:questionId" element={<PracticePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </main>
       <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-500">
