@@ -13,7 +13,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setProgress(readProgress())
-    fetch("/questions.json")
+    const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
+    fetch(questionsUrl)
       .then((res) => {
         if (!res.ok) throw new Error("failed")
         return res.json()

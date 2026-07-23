@@ -22,7 +22,8 @@ export default function HomePage() {
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
-    fetch("/questions.json")
+    const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
+    fetch(questionsUrl)
       .then((res) => res.json())
       .then((data: Question[]) => setCount(data.length))
       .catch(() => setCount(null))
