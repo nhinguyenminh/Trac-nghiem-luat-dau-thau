@@ -24,6 +24,7 @@ interface ProfileContextValue {
   login: (profileId: string, password: string) => { ok: boolean; error?: string }
   logout: () => void
   deleteProfile: (profileId: string) => void
+  resetAllData: (profileId: string) => void
 }
 
 const ProfileContext = createContext<ProfileContextValue | null>(null)
@@ -81,6 +82,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setActiveProfileId((currentId) => (currentId === profileId ? null : currentId))
   }, [])
 
+  const resetAllData = useCallback((profileId: string) => {
+    clearProfileData(profileId)
+  }, [])
+
   const value = useMemo(
     () => ({
       profiles,
@@ -89,8 +94,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       deleteProfile,
+      resetAllData,
     }),
-    [profiles, activeProfile, createProfile, login, logout, deleteProfile],
+    [profiles, activeProfile, createProfile, login, logout, deleteProfile, resetAllData],
   )
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react"
-import type { QuestionScope } from "./types"
+import type { PracticeMode, QuestionScope } from "./types"
 
 export interface Settings {
   autoNext: boolean
   showNextButton: boolean
   allowRepeat: boolean
   questionScope: QuestionScope
+  practiceMode: PracticeMode
   selectedCategories: string[]
 }
 
@@ -16,6 +17,7 @@ const defaultSettings: Settings = {
   showNextButton: true,
   allowRepeat: true,
   questionScope: "all",
+  practiceMode: "normal",
   selectedCategories: [],
 }
 
@@ -41,6 +43,7 @@ function readSettings(profileId: string | null): Settings {
         parsed.questionScope === "first200" || parsed.questionScope === "after200" || parsed.questionScope === "supplement50"
           ? parsed.questionScope
           : defaultSettings.questionScope,
+      practiceMode: parsed.practiceMode === "focusWrongAndStale" ? parsed.practiceMode : defaultSettings.practiceMode,
       selectedCategories,
     }
   } catch {

@@ -1,5 +1,7 @@
 export type QuestionScope = "all" | "first200" | "after200" | "supplement50"
 
+export type PracticeMode = "normal" | "focusWrongAndStale"
+
 export interface Question {
   id: number
   category?: string

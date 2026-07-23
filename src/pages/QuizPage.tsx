@@ -4,9 +4,9 @@ import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRigh
 import { getAttemptsStorageKey, useStats } from "../useStats"
 import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
-import { readProgress, resetProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
+import { readProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
 import { useProfile } from "../contexts/ProfileContext"
-import type { Question, QuestionProgress, QuestionScope } from "../types"
+import type { PracticeMode, Question, QuestionProgress, QuestionScope } from "../types"
 
 const LETTERS = ["A", "B", "C", "D"]
 const AUTO_NEXT_MS = 3000
@@ -108,7 +108,48 @@ function getQuestionDifficultyScore(progress: QuestionProgress | undefined): num
   return progress.wrongCount * 100 + averageResponseTimeMs / 1000
 }
 
-function buildQuestionQueue(
+function getQuestionAttemptCount(progress: QuestionProgress | undefined): number {
+  if (!progress) return 0
+  return progress.correctCount + progress.wrongCount
+}
+
+function getQuestionAverageResponseTimeMs(progress: QuestionProgress | undefined): number {
+  const attempts = getQuestionAttemptCount(progress)
+  if (attempts <= 0) return 0
+  return progress ? progress.totalResponseTimeMs / attempts : 0
+}
+
+function getQuestionFocusScore(progress: QuestionProgress | undefined, maxAttemptCount: number): number {
+  const attempts = getQuestionAttemptCount(progress)
+  const averageResponseTimeMs = getQuestionAverageResponseTimeMs(progress)
+  const unseenBonus = attempts === 0 ? 5 : 0
+  const lowAttemptBonus = Math.max(0, maxAttemptCount - attempts) * 2
+
+  return getQuestionDifficultyScore(progress) + lowAttemptBonus + unseenBonus
+}
+
+function ensureFirstQuestionNotRepeated(queue: Question[], previousQuestionId?: number): Question[] {
+  if (previousQuestionId == null || queue.length <= 1) return queue
+
+  const firstDifferentIndex = queue.findIndex((question) => question.id !== previousQuestionId)
+  if (firstDifferentIndex <= 0) return queue
+
+  const [firstDifferentQuestion] = queue.splice(firstDifferentIndex, 1)
+  queue.unshift(firstDifferentQuestion)
+  return queue
+}
+
+function buildNormalQuestionQueue(sourceQuestions: Question[], previousQuestionId?: number): Question[] {
+  const queue = [...sourceQuestions]
+  for (let i = queue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[queue[i], queue[j]] = [queue[j], queue[i]]
+  }
+
+  return ensureFirstQuestionNotRepeated(queue, previousQuestionId)
+}
+
+function buildFocusQuestionQueue(
   sourceQuestions: Question[],
   progressMap: Map<number, QuestionProgress>,
   previousQuestionId?: number,
@@ -119,38 +160,51 @@ function buildQuestionQueue(
     const wrongDiff = (bProgress?.wrongCount ?? 0) - (aProgress?.wrongCount ?? 0)
     if (wrongDiff !== 0) return wrongDiff
 
-    const aAttempts = (aProgress?.correctCount ?? 0) + (aProgress?.wrongCount ?? 0)
-    const bAttempts = (bProgress?.correctCount ?? 0) + (bProgress?.wrongCount ?? 0)
-    const aAvg = aAttempts > 0 && aProgress ? aProgress.totalResponseTimeMs / aAttempts : 0
-    const bAvg = bAttempts > 0 && bProgress ? bProgress.totalResponseTimeMs / bAttempts : 0
+    const aAvg = getQuestionAverageResponseTimeMs(aProgress)
+    const bAvg = getQuestionAverageResponseTimeMs(bProgress)
     if (bAvg !== aAvg) return bAvg - aAvg
+
+    const aAttempts = getQuestionAttemptCount(aProgress)
+    const bAttempts = getQuestionAttemptCount(bProgress)
+    if (aAttempts !== bAttempts) return aAttempts - bAttempts
 
     return Math.random() - 0.5
   })
 
+  const maxAttemptCount = sorted.reduce((max, question) => {
+    const attempts = getQuestionAttemptCount(progressMap.get(question.id))
+    return attempts > max ? attempts : max
+  }, 0)
+
   const maxScore = sorted.reduce((max, question) => {
-    const score = getQuestionDifficultyScore(progressMap.get(question.id))
+    const score = getQuestionFocusScore(progressMap.get(question.id), maxAttemptCount)
     return score > max ? score : max
   }, 0)
 
   const expanded: Question[] = []
   for (const question of sorted) {
-    const score = getQuestionDifficultyScore(progressMap.get(question.id))
+    const score = getQuestionFocusScore(progressMap.get(question.id), maxAttemptCount)
     const repeats = maxScore <= 0 ? 1 : Math.max(1, Math.min(10, Math.round((score / maxScore) * 10)))
     for (let i = 0; i < repeats; i++) {
       expanded.push(question)
     }
   }
 
-  const shuffled = expanded.length > 0 ? expanded : sorted
-  if (previousQuestionId == null || shuffled.length <= 1) return shuffled
+  const queue = expanded.length > 0 ? expanded : sorted
+  return ensureFirstQuestionNotRepeated(queue, previousQuestionId)
+}
 
-  const firstDifferentIndex = shuffled.findIndex((question) => question.id !== previousQuestionId)
-  if (firstDifferentIndex <= 0) return shuffled
+function buildQuestionQueue(
+  sourceQuestions: Question[],
+  progressMap: Map<number, QuestionProgress>,
+  practiceMode: PracticeMode,
+  previousQuestionId?: number,
+): Question[] {
+  if (practiceMode === "normal") {
+    return buildNormalQuestionQueue(sourceQuestions, previousQuestionId)
+  }
 
-  const [firstDifferentQuestion] = shuffled.splice(firstDifferentIndex, 1)
-  shuffled.unshift(firstDifferentQuestion)
-  return shuffled
+  return buildFocusQuestionQueue(sourceQuestions, progressMap, previousQuestionId)
 }
 
 function readStoredAttempts(storageKey: string | null): StoredAttempt[] {
@@ -193,7 +247,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const location = useLocation()
   const { activeProfile } = useProfile()
   const profileId = activeProfile?.id ?? null
-  const { stats, accuracy, record, reset } = useStats(profileId)
+  const { stats, accuracy, record } = useStats(profileId)
   const { settings, setValue, toggleCategory } = useSettings(profileId)
 
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
@@ -230,19 +284,27 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     }
   }, [])
 
-  const initializeQuestions = useCallback((sourceQuestions: Question[], previousQuestionId?: number) => {
-    if (sourceQuestions.length === 0) {
-      questionQueueRef.current = []
-      setCurrent(null)
-      return
-    }
+  const initializeQuestions = useCallback(
+    (sourceQuestions: Question[], previousQuestionId?: number) => {
+      if (sourceQuestions.length === 0) {
+        questionQueueRef.current = []
+        setCurrent(null)
+        return
+      }
 
-    const queue = buildQuestionQueue(sourceQuestions, new Map(progressRef.current.map((item) => [item.questionId, item])), previousQuestionId)
-    const firstQuestion = queue[0] ?? null
-    questionQueueRef.current = firstQuestion ? queue.slice(1) : []
-    questionStartedAtRef.current = Date.now()
-    setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
-  }, [])
+      const queue = buildQuestionQueue(
+        sourceQuestions,
+        new Map(progressRef.current.map((item) => [item.questionId, item])),
+        settings.practiceMode,
+        previousQuestionId,
+      )
+      const firstQuestion = queue[0] ?? null
+      questionQueueRef.current = firstQuestion ? queue.slice(1) : []
+      questionStartedAtRef.current = Date.now()
+      setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
+    },
+    [settings.practiceMode],
+  )
 
   const applyQuestionSelection = useCallback(
     (rawQuestions: Question[], shouldResetHistory = true) => {
@@ -281,13 +343,14 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
         : buildQuestionQueue(
             questions,
             new Map(progressRef.current.map((item) => [item.questionId, item])),
+            settings.practiceMode,
             current?.id,
           )
     const nextQuestion = queue[0] ?? null
     questionQueueRef.current = nextQuestion ? queue.slice(1) : []
     questionStartedAtRef.current = Date.now()
     setCurrent(nextQuestion ? shuffleQuestion(nextQuestion) : null)
-  }, [questions, current?.id, clearTimer])
+  }, [questions, settings.practiceMode, current?.id, clearTimer])
 
   useEffect(() => {
     setProgress(readProgress(profileId))
@@ -368,14 +431,15 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     setReviewIndex(i)
   }
 
-  const handleReset = () => {
+  const handleResetSession = () => {
     clearTimer()
-    reset()
-    setProgress(resetProgress(profileId))
     setHistory([])
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
+    if (attemptsStorageKey) {
+      localStorage.removeItem(attemptsStorageKey)
+    }
     initializeQuestions(questions)
   }
 
@@ -523,6 +587,32 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
                       className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
                     />
                     <span>Chuyển câu bằng nút</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700">
+                <p className="mb-2 font-medium text-slate-800">Chế độ luyện</p>
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
+                    <input
+                      type="radio"
+                      name="practiceMode"
+                      checked={settings.practiceMode === "normal"}
+                      onChange={() => setValue("practiceMode", "normal")}
+                      className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                    />
+                    <span>Bình thường (ngẫu nhiên)</span>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2">
+                    <input
+                      type="radio"
+                      name="practiceMode"
+                      checked={settings.practiceMode === "focusWrongAndStale"}
+                      onChange={() => setValue("practiceMode", "focusWrongAndStale")}
+                      className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                    />
+                    <span>Ưu tiên câu sai, lâu chưa ôn</span>
                   </label>
                 </div>
               </div>
@@ -700,7 +790,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
             <section>
               <h3 className="mb-3 text-base font-semibold text-slate-800">Thống kê</h3>
-              <StatsPanel stats={stats} accuracy={accuracy} onReset={handleReset} />
+              <StatsPanel stats={stats} accuracy={accuracy} onReset={handleResetSession} resetLabel="Làm phiên mới" />
             </section>
             </>
           )}

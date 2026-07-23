@@ -5,6 +5,7 @@ interface StatsPanelProps {
   stats: Stats
   accuracy: number
   onReset: () => void
+  resetLabel?: string
 }
 
 function StatCard({
@@ -27,7 +28,7 @@ function StatCard({
   )
 }
 
-export default function StatsPanel({ stats, accuracy, onReset }: StatsPanelProps) {
+export default function StatsPanel({ stats, accuracy, onReset, resetLabel = "Reset kết quả" }: StatsPanelProps) {
   return (
     <section aria-label="Thống kê kết quả">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -72,7 +73,7 @@ export default function StatsPanel({ stats, accuracy, onReset }: StatsPanelProps
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <RotateCcw className="h-4 w-4" />
-        Reset kết quả
+        {resetLabel}
       </button>
     </section>
   )

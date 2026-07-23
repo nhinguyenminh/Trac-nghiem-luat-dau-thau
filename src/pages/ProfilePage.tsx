@@ -77,7 +77,7 @@ function ProfileRow({ profile, isActive, onLogin, onDelete }: ProfileRowProps) {
 }
 
 export default function ProfilePage() {
-  const { profiles, activeProfile, createProfile, login, logout, deleteProfile } = useProfile()
+  const { profiles, activeProfile, createProfile, login, logout, deleteProfile, resetAllData } = useProfile()
   const [questions, setQuestions] = useState<Question[]>([])
   const [progress, setProgress] = useState<QuestionProgress[]>([])
   const [loading, setLoading] = useState(true)
@@ -199,6 +199,18 @@ export default function ProfilePage() {
         {activeProfile && (
           <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             Đang đăng nhập: <span className="font-semibold">{activeProfile.name}</span>
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  resetAllData(activeProfile.id)
+                  setProgress([])
+                }}
+                className="inline-flex items-center gap-2 rounded-lg border border-rose-300 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+              >
+                <Trash2 className="h-4 w-4" /> Reset all data
+              </button>
+            </div>
           </div>
         )}
 
