@@ -29,6 +29,36 @@ export default function ProfilePage() {
   }, [])
 
   const summary = useMemo(() => getProgressSummary(questions, progress), [questions, progress])
+  const baseQuestions = useMemo(() => questions.filter((question) => question.id <= 390), [questions])
+  const supplementQuestions = useMemo(() => questions.filter((question) => question.id > 390), [questions])
+
+  const renderQuestionGrid = (items: Question[]) => (
+    <div className="grid max-h-[50vh] grid-cols-5 gap-2 overflow-y-auto rounded-xl border border-slate-200 p-3 sm:grid-cols-10">
+      {items.map((question) => {
+        const status = getQuestionProgress(progress, question.id).status
+        const isCorrect = status === "correct"
+        const isWrong = status === "wrong"
+        const baseClasses =
+          "flex h-11 items-center justify-center rounded-xl border text-sm font-semibold transition"
+        const statusClasses = isCorrect
+          ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+          : isWrong
+          ? "border-rose-300 bg-rose-50 text-rose-800 hover:bg-rose-100"
+          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+
+        return (
+          <Link
+            key={question.id}
+            to={`/practice/${question.id}`}
+            className={`${baseClasses} ${statusClasses}`}
+            title={`Câu ${question.id} · ${status === "correct" ? "Đúng" : status === "wrong" ? "Sai" : "Chưa xem"}`}
+          >
+            {question.id}
+          </Link>
+        )
+      })}
+    </div>
+  )
 
   if (loading) {
     return (
@@ -104,30 +134,28 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid max-h-[65vh] grid-cols-5 gap-2 overflow-y-auto rounded-xl border border-slate-200 p-3 sm:grid-cols-10">
-          {questions.map((question) => {
-            const status = getQuestionProgress(progress, question.id).status
-            const isCorrect = status === "correct"
-            const isWrong = status === "wrong"
-            const baseClasses =
-              "flex h-11 items-center justify-center rounded-xl border text-sm font-semibold transition"
-            const statusClasses = isCorrect
-              ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-              : isWrong
-              ? "border-rose-300 bg-rose-50 text-rose-800 hover:bg-rose-100"
-              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+        <div className="flex flex-col gap-4">
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-800">Bộ 390 câu</h3>
+              <span className="text-xs text-slate-500">{baseQuestions.length} câu</span>
+            </div>
+            {renderQuestionGrid(baseQuestions)}
+          </div>
 
-            return (
-              <Link
-                key={question.id}
-                to={`/practice/${question.id}`}
-                className={`${baseClasses} ${statusClasses}`}
-                title={`Câu ${question.id} · ${status === "correct" ? "Đúng" : status === "wrong" ? "Sai" : "Chưa xem"}`}
-              >
-                {question.id}
-              </Link>
-            )
-          })}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-800">Bộ bổ sung</h3>
+              <span className="text-xs text-slate-500">{supplementQuestions.length} câu</span>
+            </div>
+            {supplementQuestions.length > 0 ? (
+              renderQuestionGrid(supplementQuestions)
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                Chưa có câu hỏi trong bộ bổ sung.
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>
