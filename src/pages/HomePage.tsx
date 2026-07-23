@@ -4,6 +4,7 @@ import { Play, BookOpen, Infinity as InfinityIcon, Smartphone } from "lucide-rea
 import { useStats } from "../useStats"
 import StatsPanel from "../components/StatsPanel"
 import type { Question } from "../types"
+import { useProfile } from "../contexts/ProfileContext"
 
 function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
@@ -18,7 +19,8 @@ function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; 
 }
 
 export default function HomePage() {
-  const { stats, accuracy, reset } = useStats()
+  const { activeProfile } = useProfile()
+  const { stats, accuracy, reset } = useStats(activeProfile?.id ?? null)
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
@@ -68,6 +70,11 @@ export default function HomePage() {
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Thống kê của bạn</h2>
+        {!activeProfile && (
+          <p className="mb-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            Chưa đăng nhập profile, thống kê chỉ là tạm thời cho phiên hiện tại.
+          </p>
+        )}
         <StatsPanel stats={stats} accuracy={accuracy} onReset={reset} />
       </section>
     </div>

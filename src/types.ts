@@ -16,8 +16,18 @@ export interface QuestionProgress {
   status: QuestionProgressStatus
   correctCount: number
   wrongCount: number
+  totalResponseTimeMs: number
   lastResult: "correct" | "wrong" | null
+  lastResponseTimeMs: number | null
   lastUpdated: Date | null
+}
+
+export interface UserProfile {
+  id: string
+  name: string
+  password: string
+  createdAt: string
+  lastLoginAt: string
 }
 
 export interface Stats {

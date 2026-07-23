@@ -2719,8 +2719,7 @@
       "Hệ thống tự động mở thầu và công khai biên bản mở thầu trong thời hạn không quá 02 giờ kể từ thời điểm đóng thầu.",
       "Chủ đầu tư phải mở thầu và công khai biên bản mở thầu trên Hệ thống trong thời hạn không quá 04 giờ kể từ thời điểm đóng thầu.",
       "Tổ chuyên gia phải mở thầu và công khai biên bản mở thầu trên Hệ thống trong thời hạn không quá 02 giờ kể từ thời điểm đóng thầu.",
-      "Chủ đầu tư phải mở thầu và công khai biên bản mở thầu trên Hệ thống trong thời hạn không quá",
-      "02 giờ kể từ thời điểm đóng thầu."
+      "Chủ đầu tư phải mở thầu và công khai biên bản mở thầu trên Hệ thống trong thời hạn không quá 02 giờ kể từ thời điểm đóng thầu."
     ],
     "answer": 3
   },
@@ -3545,8 +3544,7 @@
     "category": "Kế hoạch lựa chọn nhà thầu",
     "question": "Nhận định nào sau đây là đúng?",
     "options": [
-      "Việc áp dụng mua sắm trực tuyến không cần phê duyệt trong kế hoạch lựa chọn nhà thầu và",
-      "được áp dụng đối với hàng hóa, dịch vụ tư vấn của gói thầu thuộc dự toán mua sắm có giá gói thầu không quá 500 triệu đồng",
+      "Việc áp dụng mua sắm trực tuyến không cần phê duyệt trong kế hoạch lựa chọn nhà thầu và được áp dụng đối với hàng hóa, dịch vụ tư vấn của gói thầu thuộc dự toán mua sắm có giá gói thầu không quá 500 triệu đồng",
       "Việc áp dụng mua sắm trực tuyến phải được phê duyệt trong kế hoạch lựa chọn nhà thầu và được áp dụng đối với gói thầu mua sắm hàng hóa, gói thầu dịch vụ tư vấn thuộc dự toán mua sắm có giá gói thầu không quá 500 triệu đồng",
       "Mua sắm trực tuyến phải được phê duyệt trong kế hoạch lựa chọn nhà thầu và được áp dụng đối với gói thầu mua sắm hàng hóa, gói thầu dịch vụ tư vấn thuộc dự toán có giá gói thầu không quá 01 tỷ đồng",
       "Các phương án trên đều sai"

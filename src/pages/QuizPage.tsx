@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { CheckCircle2, XCircle, Loader2, AlertTriangle, ChevronLeft, ChevronRight, Play } from "lucide-react"
-import { ATTEMPTS_KEY, useStats } from "../useStats"
+import { getAttemptsStorageKey, useStats } from "../useStats"
 import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
 import { readProgress, resetProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
+import { useProfile } from "../contexts/ProfileContext"
 import type { Question, QuestionProgress, QuestionScope } from "../types"
 
 const LETTERS = ["A", "B", "C", "D"]
@@ -108,8 +109,49 @@ function shuffleArray<T>(items: T[]): T[] {
   return result
 }
 
-function buildQuestionQueue(sourceQuestions: Question[], previousQuestionId?: number): Question[] {
-  const shuffled = shuffleArray(sourceQuestions)
+function getQuestionDifficultyScore(progress: QuestionProgress | undefined): number {
+  if (!progress) return 0
+  const attempts = progress.correctCount + progress.wrongCount
+  const averageResponseTimeMs = attempts > 0 ? progress.totalResponseTimeMs / attempts : 0
+
+  return progress.wrongCount * 100 + averageResponseTimeMs / 1000
+}
+
+function buildQuestionQueue(
+  sourceQuestions: Question[],
+  progressMap: Map<number, QuestionProgress>,
+  previousQuestionId?: number,
+): Question[] {
+  const sorted = [...sourceQuestions].sort((a, b) => {
+    const aProgress = progressMap.get(a.id)
+    const bProgress = progressMap.get(b.id)
+    const wrongDiff = (bProgress?.wrongCount ?? 0) - (aProgress?.wrongCount ?? 0)
+    if (wrongDiff !== 0) return wrongDiff
+
+    const aAttempts = (aProgress?.correctCount ?? 0) + (aProgress?.wrongCount ?? 0)
+    const bAttempts = (bProgress?.correctCount ?? 0) + (bProgress?.wrongCount ?? 0)
+    const aAvg = aAttempts > 0 && aProgress ? aProgress.totalResponseTimeMs / aAttempts : 0
+    const bAvg = bAttempts > 0 && bProgress ? bProgress.totalResponseTimeMs / bAttempts : 0
+    if (bAvg !== aAvg) return bAvg - aAvg
+
+    return Math.random() - 0.5
+  })
+
+  const maxScore = sorted.reduce((max, question) => {
+    const score = getQuestionDifficultyScore(progressMap.get(question.id))
+    return score > max ? score : max
+  }, 0)
+
+  const expanded: Question[] = []
+  for (const question of sorted) {
+    const score = getQuestionDifficultyScore(progressMap.get(question.id))
+    const repeats = maxScore <= 0 ? 1 : Math.max(1, Math.min(10, Math.round((score / maxScore) * 10)))
+    for (let i = 0; i < repeats; i++) {
+      expanded.push(question)
+    }
+  }
+
+  const shuffled = expanded.length > 0 ? expanded : sorted
   if (previousQuestionId == null || shuffled.length <= 1) return shuffled
 
   const firstDifferentIndex = shuffled.findIndex((question) => question.id !== previousQuestionId)
@@ -120,9 +162,10 @@ function buildQuestionQueue(sourceQuestions: Question[], previousQuestionId?: nu
   return shuffled
 }
 
-function readStoredAttempts(): StoredAttempt[] {
+function readStoredAttempts(storageKey: string | null): StoredAttempt[] {
+  if (!storageKey) return []
   try {
-    const raw = localStorage.getItem(ATTEMPTS_KEY)
+    const raw = localStorage.getItem(storageKey)
     if (!raw) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
@@ -157,8 +200,10 @@ function restoreAttempts(rawQuestions: Question[], storedAttempts: StoredAttempt
 
 export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const location = useLocation()
-  const { stats, accuracy, record, reset } = useStats()
-  const { settings, setValue, toggleCategory } = useSettings()
+  const { activeProfile } = useProfile()
+  const profileId = activeProfile?.id ?? null
+  const { stats, accuracy, record, reset } = useStats(profileId)
+  const { settings, setValue, toggleCategory } = useSettings(profileId)
 
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
   const [questions, setQuestions] = useState<Question[]>([])
@@ -172,12 +217,20 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
   const [history, setHistory] = useState<Attempt[]>([])
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
-  const [, setProgress] = useState<QuestionProgress[]>([])
+  const [progress, setProgress] = useState<QuestionProgress[]>([])
   const availableCategories = useMemo(() => getQuestionCategories(allQuestions), [allQuestions])
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const questionQueueRef = useRef<Question[]>([])
   const hasLoadedInitialQuestions = useRef(false)
+  const questionStartedAtRef = useRef<number>(Date.now())
+  const progressRef = useRef<QuestionProgress[]>([])
+
+  const attemptsStorageKey = useMemo(() => (profileId ? getAttemptsStorageKey(profileId) : null), [profileId])
+
+  useEffect(() => {
+    progressRef.current = progress
+  }, [progress])
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -186,16 +239,17 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     }
   }, [])
 
-  const initializeQuestions = useCallback((sourceQuestions: Question[]) => {
+  const initializeQuestions = useCallback((sourceQuestions: Question[], previousQuestionId?: number) => {
     if (sourceQuestions.length === 0) {
       questionQueueRef.current = []
       setCurrent(null)
       return
     }
 
-    const queue = buildQuestionQueue(sourceQuestions)
+    const queue = buildQuestionQueue(sourceQuestions, new Map(progressRef.current.map((item) => [item.questionId, item])), previousQuestionId)
     const firstQuestion = queue[0] ?? null
     questionQueueRef.current = firstQuestion ? queue.slice(1) : []
+    questionStartedAtRef.current = Date.now()
     setCurrent(firstQuestion ? shuffleQuestion(firstQuestion) : null)
   }, [])
 
@@ -214,6 +268,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
       if (practiceQuestionId != null) {
         const practiceQuestion = filteredQuestions.find((question) => question.id === practiceQuestionId) ?? null
+        questionStartedAtRef.current = Date.now()
         setCurrent(practiceQuestion ? shuffleQuestion(practiceQuestion) : null)
         questionQueueRef.current = []
       } else {
@@ -229,14 +284,22 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     setSelected(null)
     setLocked(false)
 
-    const queue = questionQueueRef.current.length > 0 ? questionQueueRef.current : buildQuestionQueue(questions, current?.id)
+    const queue =
+      questionQueueRef.current.length > 0
+        ? questionQueueRef.current
+        : buildQuestionQueue(
+            questions,
+            new Map(progressRef.current.map((item) => [item.questionId, item])),
+            current?.id,
+          )
     const nextQuestion = queue[0] ?? null
     questionQueueRef.current = nextQuestion ? queue.slice(1) : []
+    questionStartedAtRef.current = Date.now()
     setCurrent(nextQuestion ? shuffleQuestion(nextQuestion) : null)
   }, [questions, current?.id, clearTimer])
 
   useEffect(() => {
-    setProgress(readProgress())
+    setProgress(readProgress(profileId))
     const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
     fetch(questionsUrl)
       .then((res) => {
@@ -246,7 +309,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
       .then((data: Question[]) => {
         const rawQuestions = data.map((question) => ({ ...question }))
         applyQuestionSelection(rawQuestions, false)
-        setHistory(restoreAttempts(rawQuestions, readStoredAttempts()))
+        setHistory(restoreAttempts(rawQuestions, readStoredAttempts(attemptsStorageKey)))
         hasLoadedInitialQuestions.current = true
         setLoading(false)
       })
@@ -254,19 +317,28 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
         setError(true)
         setLoading(false)
       })
-  }, [applyQuestionSelection])
+  }, [applyQuestionSelection, profileId, attemptsStorageKey])
 
   useEffect(() => {
+    if (!profileId) {
+      setProgress([])
+      setHistory([])
+      setReviewIndex(null)
+      setSelected(null)
+      setLocked(false)
+      return
+    }
+
     if (allQuestions.length === 0 || !hasLoadedInitialQuestions.current) return
     applyQuestionSelection(allQuestions, true)
-  }, [allQuestions, applyQuestionSelection])
+  }, [allQuestions, applyQuestionSelection, profileId])
 
   // persist attempts whenever history changes
   useEffect(() => {
-    if (loading) return
+    if (loading || !attemptsStorageKey) return
     const stored: StoredAttempt[] = history.map((a) => ({ id: a.question.id, selected: a.selected, question: a.question }))
-    localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(stored))
-  }, [history, loading])
+    localStorage.setItem(attemptsStorageKey, JSON.stringify(stored))
+  }, [history, loading, attemptsStorageKey])
 
   useEffect(() => clearTimer, [clearTimer])
 
@@ -288,9 +360,10 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     setLocked(true)
     const correct = index === current.answer
     record(correct)
+    const responseTimeMs = Date.now() - questionStartedAtRef.current
     setProgress((prev) => {
-      const next = updateQuestionProgress(prev, current.id, correct)
-      writeProgress(next)
+      const next = updateQuestionProgress(prev, current.id, correct, responseTimeMs)
+      writeProgress(profileId, next)
       return next
     })
     setHistory((prev) => [...prev, { question: current, selected: index }])
@@ -307,7 +380,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const handleReset = () => {
     clearTimer()
     reset()
-    setProgress(resetProgress())
+    setProgress(resetProgress(profileId))
     setHistory([])
     setReviewIndex(null)
     setSelected(null)
@@ -377,6 +450,12 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
             Thiết lập
           </button>
         </div>
+
+        {!activeProfile && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Chưa đăng nhập profile. Kết quả làm bài sẽ không được lưu. Vào trang Hồ sơ để đăng nhập.
+          </div>
+        )}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           {showSettings && (

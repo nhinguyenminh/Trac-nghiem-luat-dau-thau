@@ -19,9 +19,14 @@ const defaultSettings: Settings = {
   selectedCategories: [],
 }
 
-function readSettings(): Settings {
+function getStorageKey(profileId: string) {
+  return `${STORAGE_KEY}:${profileId}`
+}
+
+function readSettings(profileId: string | null): Settings {
+  if (!profileId) return defaultSettings
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(getStorageKey(profileId))
     if (!raw) return defaultSettings
     const parsed = JSON.parse(raw) as Partial<Settings>
     const selectedCategories = Array.isArray(parsed.selectedCategories)
@@ -43,19 +48,20 @@ function readSettings(): Settings {
   }
 }
 
-export function useSettings() {
+export function useSettings(profileId: string | null) {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    setSettings(readSettings())
+    setSettings(readSettings(profileId))
     setLoaded(true)
-  }, [])
+  }, [profileId])
 
   useEffect(() => {
     if (!loaded) return
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-  }, [settings, loaded])
+    if (!profileId) return
+    localStorage.setItem(getStorageKey(profileId), JSON.stringify(settings))
+  }, [settings, loaded, profileId])
 
   const toggle = useCallback((key: keyof Settings) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
