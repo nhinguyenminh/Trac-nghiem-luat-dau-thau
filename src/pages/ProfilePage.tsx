@@ -30,7 +30,10 @@ export default function ProfilePage() {
 
   const summary = useMemo(() => getProgressSummary(questions, progress), [questions, progress])
   const baseQuestions = useMemo(() => questions.filter((question) => question.id <= 390), [questions])
-  const supplementQuestions = useMemo(() => questions.filter((question) => question.id > 390), [questions])
+  const supplementQuestions = useMemo(
+    () => baseQuestions.filter((question) => question.id >= 341 && question.id <= 390),
+    [baseQuestions],
+  )
 
   const renderQuestionGrid = (items: Question[]) => (
     <div className="grid max-h-[50vh] grid-cols-5 gap-2 overflow-y-auto rounded-xl border border-slate-200 p-3 sm:grid-cols-10">
@@ -145,16 +148,10 @@ export default function ProfilePage() {
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">Bộ bổ sung</h3>
+              <h3 className="text-sm font-semibold text-slate-800">50 câu bổ sung (STT 341-390)</h3>
               <span className="text-xs text-slate-500">{supplementQuestions.length} câu</span>
             </div>
-            {supplementQuestions.length > 0 ? (
-              renderQuestionGrid(supplementQuestions)
-            ) : (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                Chưa có câu hỏi trong bộ bổ sung.
-              </div>
-            )}
+            {renderQuestionGrid(supplementQuestions)}
           </div>
         </div>
       </section>

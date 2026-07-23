@@ -5,7 +5,6 @@ from openpyxl import load_workbook
 ROOT = Path(__file__).resolve().parent.parent
 INPUT_FILES = [
     ROOT / "data" / "390-cau-hoi-luat-dau-thau.xlsx",
-    ROOT / "data" / "50-cau-bo-sung.xlsx",
 ]
 OUTPUT_PATH = ROOT / "public" / "questions.json"
 

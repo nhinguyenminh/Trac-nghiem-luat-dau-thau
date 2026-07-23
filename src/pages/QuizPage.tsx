@@ -52,12 +52,11 @@ function shouldShuffleOptions(question: Question): boolean {
 function getQuestionsForScope(questions: Question[], scope: QuestionScope): Question[] {
   const sorted = [...questions].sort((a, b) => a.id - b.id)
   const baseQuestions = sorted.filter((question) => question.id <= 390)
-  const supplementQuestions = sorted.filter((question) => question.id > 390)
 
   if (scope === "first200") return baseQuestions.slice(0, 200)
   if (scope === "after200") return baseQuestions.slice(200)
-  if (scope === "supplement50") return supplementQuestions.slice(0, 50)
-  return sorted
+  if (scope === "supplement50") return baseQuestions.slice(340, 390)
+  return baseQuestions
 }
 
 function getQuestionsForCategories(questions: Question[], selectedCategories: string[]): Question[] {
@@ -421,7 +420,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
                     onChange={() => setValue("questionScope", "supplement50")}
                     className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
                   />
-                  50 câu bộ bổ sung
+                  50 câu bổ sung (STT 341-390)
                 </label>
               </div>
 
