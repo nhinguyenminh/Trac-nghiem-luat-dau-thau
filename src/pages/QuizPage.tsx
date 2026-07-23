@@ -121,7 +121,6 @@ function getQuestionAverageResponseTimeMs(progress: QuestionProgress | undefined
 
 function getQuestionFocusScore(progress: QuestionProgress | undefined, maxAttemptCount: number): number {
   const attempts = getQuestionAttemptCount(progress)
-  const averageResponseTimeMs = getQuestionAverageResponseTimeMs(progress)
   const unseenBonus = attempts === 0 ? 5 : 0
   const lowAttemptBonus = Math.max(0, maxAttemptCount - attempts) * 2
 
