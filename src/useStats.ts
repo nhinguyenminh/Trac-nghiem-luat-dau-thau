@@ -20,11 +20,12 @@ function readStoredStats(profileId: string | null): Stats {
     const raw = localStorage.getItem(getStatsKey(profileId))
     if (!raw) return emptyStats
     const parsed = JSON.parse(raw) as Partial<Stats>
-    return {
-      total: Number.isInteger(parsed.total) && parsed.total >= 0 ? parsed.total : 0,
-      correct: Number.isInteger(parsed.correct) && parsed.correct >= 0 ? parsed.correct : 0,
-      wrong: Number.isInteger(parsed.wrong) && parsed.wrong >= 0 ? parsed.wrong : 0,
-    }
+    const total = typeof parsed.total === "number" && Number.isInteger(parsed.total) && parsed.total >= 0 ? parsed.total : 0
+    const correct =
+      typeof parsed.correct === "number" && Number.isInteger(parsed.correct) && parsed.correct >= 0 ? parsed.correct : 0
+    const wrong = typeof parsed.wrong === "number" && Number.isInteger(parsed.wrong) && parsed.wrong >= 0 ? parsed.wrong : 0
+
+    return { total, correct, wrong }
   } catch {
     return emptyStats
   }
