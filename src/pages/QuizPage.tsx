@@ -174,6 +174,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const [history, setHistory] = useState<Attempt[]>([])
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
   const [, setProgress] = useState<QuestionProgress[]>([])
+  const availableCategories = useMemo(() => getQuestionCategories(allQuestions), [allQuestions])
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const questionQueueRef = useRef<Question[]>([])
@@ -340,7 +341,6 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const shownLocked = reviewing ? true : locked
   const isCorrect = shownSelected !== null && shownSelected === shownQuestion.answer
   const shouldShowNextButton = settings.showNextButton && !settings.autoNext
-  const availableCategories = useMemo(() => getQuestionCategories(allQuestions), [allQuestions])
   const isAllCategoriesSelected = availableCategories.length > 0 && settings.selectedCategories.length === availableCategories.length
 
   const handleToggleAllCategories = () => {
