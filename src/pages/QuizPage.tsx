@@ -6,7 +6,7 @@ import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
 import { readProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
 import { useProfile } from "../contexts/ProfileContext"
-import type { PracticeMode, Question, QuestionProgress, QuestionScope } from "../types"
+import type { PracticeMode, Question, QuestionProgress, QuestionScope, Stats } from "../types"
 
 const LETTERS = ["A", "B", "C", "D"]
 const AUTO_NEXT_MS = 3000
@@ -25,6 +25,8 @@ interface StoredAttempt {
   selected: number
   question?: Question
 }
+
+const emptySessionStats: Stats = { total: 0, correct: 0, wrong: 0 }
 
 function normalizeText(value: string): string {
   return String(value ?? "")
@@ -246,7 +248,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const location = useLocation()
   const { activeProfile } = useProfile()
   const profileId = activeProfile?.id ?? null
-  const { stats, accuracy, record } = useStats(profileId)
+  const { record } = useStats(profileId)
   const { settings, setValue, toggleCategory } = useSettings(profileId)
 
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
@@ -262,6 +264,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const [history, setHistory] = useState<Attempt[]>([])
   const [reviewIndex, setReviewIndex] = useState<number | null>(null)
   const [progress, setProgress] = useState<QuestionProgress[]>([])
+  const [sessionStats, setSessionStats] = useState<Stats>(emptySessionStats)
   const availableCategories = useMemo(() => getQuestionCategories(allQuestions), [allQuestions])
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -353,6 +356,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
   useEffect(() => {
     setProgress(readProgress(profileId))
+    setSessionStats(emptySessionStats)
     const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
     fetch(questionsUrl)
       .then((res) => {
@@ -379,6 +383,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
       setReviewIndex(null)
       setSelected(null)
       setLocked(false)
+      setSessionStats(emptySessionStats)
       return
     }
 
@@ -413,6 +418,11 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     setLocked(true)
     const correct = index === current.answer
     record(correct)
+    setSessionStats((prev) => ({
+      total: prev.total + 1,
+      correct: prev.correct + (correct ? 1 : 0),
+      wrong: prev.wrong + (correct ? 0 : 1),
+    }))
     const responseTimeMs = Date.now() - questionStartedAtRef.current
     setProgress((prev) => {
       const next = updateQuestionProgress(prev, current.id, correct, responseTimeMs)
@@ -436,6 +446,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
     setReviewIndex(null)
     setSelected(null)
     setLocked(false)
+    setSessionStats(emptySessionStats)
     if (attemptsStorageKey) {
       localStorage.removeItem(attemptsStorageKey)
     }
@@ -469,6 +480,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   const isCorrect = shownSelected !== null && shownSelected === shownQuestion.answer
   const shouldShowNextButton = settings.showNextButton && !settings.autoNext
   const isAllCategoriesSelected = availableCategories.length > 0 && settings.selectedCategories.length === availableCategories.length
+  const sessionAccuracy = sessionStats.total === 0 ? 0 : Math.round((sessionStats.correct / sessionStats.total) * 100)
 
   const handleToggleAllCategories = () => {
     if (isAllCategoriesSelected) {
@@ -789,7 +801,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
             <section>
               <h3 className="mb-3 text-base font-semibold text-slate-800">Thống kê</h3>
-              <StatsPanel stats={stats} accuracy={accuracy} onReset={handleResetSession} resetLabel="Làm phiên mới" />
+              <StatsPanel stats={sessionStats} accuracy={sessionAccuracy} onReset={handleResetSession} resetLabel="Làm phiên mới" />
             </section>
             </>
           )}
