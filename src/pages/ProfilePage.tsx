@@ -30,10 +30,13 @@ export default function ProfilePage() {
   }, [])
 
   const summary = useMemo(() => getProgressSummary(questions, progress), [questions, progress])
-  const baseQuestions = useMemo(() => questions.filter((question) => question.id <= 390), [questions])
+  const baseQuestions = useMemo(
+    () => questions.filter((question) => question.id >= 1 && question.id <= 340),
+    [questions],
+  )
   const supplementQuestions = useMemo(
-    () => baseQuestions.filter((question) => question.id >= 341 && question.id <= 390),
-    [baseQuestions],
+    () => questions.filter((question) => question.id >= 341 && question.id <= 390),
+    [questions],
   )
 
   const renderQuestionGrid = (items: Question[]) => (
@@ -141,7 +144,7 @@ export default function ProfilePage() {
         <div className="flex flex-col gap-4">
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">Bộ 390 câu</h3>
+              <h3 className="text-sm font-semibold text-slate-800">Bộ chính (STT 1-340)</h3>
               <span className="text-xs text-slate-500">{baseQuestions.length} câu</span>
             </div>
             {renderQuestionGrid(baseQuestions)}
