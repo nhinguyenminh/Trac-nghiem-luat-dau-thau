@@ -102,12 +102,14 @@ function shuffleQuestion(question: Question): Question {
   }
 }
 
-function getQuestionDifficultyScore(progress: QuestionProgress | undefined): number {
-  if (!progress) return 0
-  const attempts = progress.correctCount + progress.wrongCount
-  const averageResponseTimeMs = attempts > 0 ? progress.totalResponseTimeMs / attempts : 0
+function shuffleQuestions(sourceQuestions: Question[]): Question[] {
+  const queue = [...sourceQuestions]
+  for (let i = queue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[queue[i], queue[j]] = [queue[j], queue[i]]
+  }
 
-  return progress.wrongCount * 100 + averageResponseTimeMs / 1000
+  return queue
 }
 
 function getQuestionAttemptCount(progress: QuestionProgress | undefined): number {
@@ -115,18 +117,8 @@ function getQuestionAttemptCount(progress: QuestionProgress | undefined): number
   return progress.correctCount + progress.wrongCount
 }
 
-function getQuestionAverageResponseTimeMs(progress: QuestionProgress | undefined): number {
-  const attempts = getQuestionAttemptCount(progress)
-  if (attempts <= 0) return 0
-  return progress ? progress.totalResponseTimeMs / attempts : 0
-}
-
-function getQuestionFocusScore(progress: QuestionProgress | undefined, maxAttemptCount: number): number {
-  const attempts = getQuestionAttemptCount(progress)
-  const unseenBonus = attempts === 0 ? 5 : 0
-  const lowAttemptBonus = Math.max(0, maxAttemptCount - attempts) * 2
-
-  return getQuestionDifficultyScore(progress) + lowAttemptBonus + unseenBonus
+function getQuestionLastUpdatedTime(progress: QuestionProgress | undefined): number {
+  return progress?.lastUpdated?.getTime() ?? 0
 }
 
 function ensureFirstQuestionNotRepeated(queue: Question[], previousQuestionId?: number): Question[] {
@@ -141,13 +133,29 @@ function ensureFirstQuestionNotRepeated(queue: Question[], previousQuestionId?: 
 }
 
 function buildNormalQuestionQueue(sourceQuestions: Question[], previousQuestionId?: number): Question[] {
-  const queue = [...sourceQuestions]
-  for (let i = queue.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[queue[i], queue[j]] = [queue[j], queue[i]]
+  const queue = shuffleQuestions(sourceQuestions)
+  return ensureFirstQuestionNotRepeated(queue, previousQuestionId)
+}
+
+function interleavePriorityBuckets(priorityBuckets: Question[][], pickOrder: number[]): Question[] {
+  const queues = priorityBuckets.map((bucket) => [...bucket])
+  const merged: Question[] = []
+
+  while (queues.some((bucket) => bucket.length > 0)) {
+    let addedInCycle = false
+
+    for (const bucketIndex of pickOrder) {
+      const nextQuestion = queues[bucketIndex]?.shift()
+      if (!nextQuestion) continue
+
+      merged.push(nextQuestion)
+      addedInCycle = true
+    }
+
+    if (!addedInCycle) break
   }
 
-  return ensureFirstQuestionNotRepeated(queue, previousQuestionId)
+  return merged
 }
 
 function buildFocusQuestionQueue(
@@ -155,43 +163,43 @@ function buildFocusQuestionQueue(
   progressMap: Map<number, QuestionProgress>,
   previousQuestionId?: number,
 ): Question[] {
-  const sorted = [...sourceQuestions].sort((a, b) => {
-    const aProgress = progressMap.get(a.id)
-    const bProgress = progressMap.get(b.id)
-    const wrongDiff = (bProgress?.wrongCount ?? 0) - (aProgress?.wrongCount ?? 0)
-    if (wrongDiff !== 0) return wrongDiff
+  const wrongQuestions: Question[] = []
+  const unseenQuestions: Question[] = []
+  const reviewedQuestions: Question[] = []
 
-    const aAvg = getQuestionAverageResponseTimeMs(aProgress)
-    const bAvg = getQuestionAverageResponseTimeMs(bProgress)
-    if (bAvg !== aAvg) return bAvg - aAvg
+  for (const question of sourceQuestions) {
+    const questionProgress = progressMap.get(question.id)
+    const attempts = getQuestionAttemptCount(questionProgress)
 
-    const aAttempts = getQuestionAttemptCount(aProgress)
-    const bAttempts = getQuestionAttemptCount(bProgress)
+    if (questionProgress?.status === "wrong") {
+      wrongQuestions.push(question)
+      continue
+    }
+
+    if (attempts === 0) {
+      unseenQuestions.push(question)
+      continue
+    }
+
+    reviewedQuestions.push(question)
+  }
+
+  const staleQuestions = [...reviewedQuestions].sort((a, b) => {
+    const lastUpdatedDiff = getQuestionLastUpdatedTime(progressMap.get(a.id)) - getQuestionLastUpdatedTime(progressMap.get(b.id))
+    if (lastUpdatedDiff !== 0) return lastUpdatedDiff
+
+    const aAttempts = getQuestionAttemptCount(progressMap.get(a.id))
+    const bAttempts = getQuestionAttemptCount(progressMap.get(b.id))
     if (aAttempts !== bAttempts) return aAttempts - bAttempts
 
     return Math.random() - 0.5
   })
 
-  const maxAttemptCount = sorted.reduce((max, question) => {
-    const attempts = getQuestionAttemptCount(progressMap.get(question.id))
-    return attempts > max ? attempts : max
-  }, 0)
+  const queue = interleavePriorityBuckets(
+    [shuffleQuestions(wrongQuestions), shuffleQuestions(unseenQuestions), staleQuestions],
+    [0, 1, 0, 2],
+  )
 
-  const maxScore = sorted.reduce((max, question) => {
-    const score = getQuestionFocusScore(progressMap.get(question.id), maxAttemptCount)
-    return score > max ? score : max
-  }, 0)
-
-  const expanded: Question[] = []
-  for (const question of sorted) {
-    const score = getQuestionFocusScore(progressMap.get(question.id), maxAttemptCount)
-    const repeats = maxScore <= 0 ? 1 : Math.max(1, Math.min(10, Math.round((score / maxScore) * 10)))
-    for (let i = 0; i < repeats; i++) {
-      expanded.push(question)
-    }
-  }
-
-  const queue = expanded.length > 0 ? expanded : sorted
   return ensureFirstQuestionNotRepeated(queue, previousQuestionId)
 }
 
