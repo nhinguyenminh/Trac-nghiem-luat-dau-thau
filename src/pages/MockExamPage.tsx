@@ -44,6 +44,7 @@ export default function MockExamPage() {
   const [error, setError] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [showReviewResult, setShowReviewResult] = useState(false)
   const [focusedQuestionId, setFocusedQuestionId] = useState<number | null>(null)
   const [timeLeftSeconds, setTimeLeftSeconds] = useState(EXAM_DURATION_SECONDS)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number | null>>({})
@@ -84,6 +85,7 @@ export default function MockExamPage() {
       setTimeLeftSeconds((prev) => {
         if (prev <= 1) {
           setIsSubmitted(true)
+          setShowReviewResult(false)
           return 0
         }
         return prev - 1
@@ -107,6 +109,7 @@ export default function MockExamPage() {
     if (!confirmed) return
     setHasStarted(true)
     setIsSubmitted(false)
+    setShowReviewResult(false)
     setFocusedQuestionId(examQuestions[0]?.id ?? null)
     setTimeLeftSeconds(EXAM_DURATION_SECONDS)
   }
@@ -115,6 +118,7 @@ export default function MockExamPage() {
     const confirmed = window.confirm("Bạn có chắc muốn nộp bài ngay bây giờ không?")
     if (!confirmed) return
     setIsSubmitted(true)
+    setShowReviewResult(false)
   }
 
   const handleRestart = () => {
@@ -132,6 +136,7 @@ export default function MockExamPage() {
     setTimeLeftSeconds(EXAM_DURATION_SECONDS)
     setHasStarted(false)
     setIsSubmitted(false)
+    setShowReviewResult(false)
   }
 
   if (loading) {
@@ -154,14 +159,6 @@ export default function MockExamPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {isSubmitted && (
-        <section className="rounded-2xl border border-emerald-300 bg-emerald-50 p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-emerald-900">Kết quả thi thử</h2>
-          <p className="mt-1 text-sm text-emerald-800">Điểm của bạn (thang 100)</p>
-          <p className="mt-2 text-4xl font-bold text-emerald-700">{score}</p>
-        </section>
-      )}
-
       {!hasStarted ? (
         <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">Sẵn sàng bắt đầu thi thử</h2>
@@ -180,6 +177,28 @@ export default function MockExamPage() {
           >
             Xác nhận bắt đầu làm bài
           </button>
+        </section>
+      ) : isSubmitted && !showReviewResult ? (
+        <section className="rounded-2xl border border-emerald-300 bg-emerald-50 p-6 text-center shadow-sm">
+          <h2 className="text-lg font-semibold text-emerald-900">Kết quả thi thử</h2>
+          <p className="mt-1 text-sm text-emerald-800">Điểm của bạn (thang 100)</p>
+          <p className="mt-2 text-5xl font-bold text-emerald-700">{score}</p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowReviewResult(true)}
+              className="rounded-lg border border-emerald-400 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+            >
+              Xem lại kết quả
+            </button>
+            <button
+              type="button"
+              onClick={handleRestart}
+              className="rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+            >
+              Tạo đề mới
+            </button>
+          </div>
         </section>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_270px]">
@@ -259,10 +278,19 @@ export default function MockExamPage() {
 
           <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-6 lg:self-start">
             <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-[10px] uppercase tracking-wide text-slate-500">Thời gian còn lại</p>
-              <p className={`mt-1 text-lg font-bold ${timeLeftSeconds <= 300 ? "text-ms-red" : "text-ms-blue-dark"}`}>
-                {formatTime(timeLeftSeconds)}
-              </p>
+              {isSubmitted ? (
+                <>
+                  <p className="text-[10px] uppercase tracking-wide text-slate-500">Điểm số</p>
+                  <p className="mt-1 text-lg font-bold text-emerald-700">{score}/100</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[10px] uppercase tracking-wide text-slate-500">Thời gian còn lại</p>
+                  <p className={`mt-1 text-lg font-bold ${timeLeftSeconds <= 300 ? "text-ms-red" : "text-ms-blue-dark"}`}>
+                    {formatTime(timeLeftSeconds)}
+                  </p>
+                </>
+              )}
               {!isSubmitted ? (
                 <button
                   type="button"
@@ -272,13 +300,22 @@ export default function MockExamPage() {
                   Nộp bài
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleRestart}
-                  className="mt-3 w-full rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
-                >
-                  Tạo đề mới
-                </button>
+                <div className="mt-3 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowReviewResult(false)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Về trang điểm
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRestart}
+                    className="w-full rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+                  >
+                    Tạo đề mới
+                  </button>
+                </div>
               )}
             </div>
 
