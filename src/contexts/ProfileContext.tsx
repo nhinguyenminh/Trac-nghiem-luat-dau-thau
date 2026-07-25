@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import type { UserProfile } from "../types"
+import { bindCloudAutoSync, isCloudSyncEnabled, reconcileCloudWithLocal } from "../services/CloudSyncService"
 import {
   createProfile as createProfileRecord,
   deleteProfile as deleteProfileRecord,
@@ -38,6 +39,25 @@ function clearProfileData(profileId: string) {
 export function ProfileProvider({ children }: { children: ReactNode }) {
   const [profiles, setProfiles] = useState<UserProfile[]>(() => readProfiles())
   const [activeProfileId, setActiveProfileId] = useState<string | null>(() => readActiveProfileId())
+
+  useEffect(() => {
+    if (!isCloudSyncEnabled()) return
+
+    let disposed = false
+    const unbind = bindCloudAutoSync()
+    void reconcileCloudWithLocal()
+      .catch(() => undefined)
+      .then(() => {
+        if (disposed) return
+        setProfiles(readProfiles())
+        setActiveProfileId(readActiveProfileId())
+      })
+
+    return () => {
+      disposed = true
+      unbind()
+    }
+  }, [])
 
   const activeProfile = useMemo(
     () => profiles.find((profile) => profile.id === activeProfileId) ?? null,

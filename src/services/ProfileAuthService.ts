@@ -1,4 +1,5 @@
 import type { UserProfile } from "../types"
+import { notifyLocalDataChanged } from "./CloudSyncService"
 
 const PROFILES_KEY = "quiz-profiles-v1"
 const ACTIVE_PROFILE_KEY = "quiz-active-profile-v1"
@@ -66,6 +67,7 @@ function readStoredProfiles(): StoredProfiles {
 
 function writeStoredProfiles(profiles: UserProfile[]) {
   localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles }))
+  notifyLocalDataChanged()
 }
 
 function generateProfileId() {
@@ -88,10 +90,12 @@ export function readActiveProfileId(): string | null {
 export function writeActiveProfileId(profileId: string | null) {
   if (profileId) {
     localStorage.setItem(ACTIVE_PROFILE_KEY, profileId)
+    notifyLocalDataChanged()
     return
   }
 
   localStorage.removeItem(ACTIVE_PROFILE_KEY)
+  notifyLocalDataChanged()
 }
 
 export function createProfile(name: string, password: string): UserProfile {

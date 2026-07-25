@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import type { Stats } from "./types"
+import { notifyLocalDataChanged } from "./services/CloudSyncService"
 
 const STORAGE_KEY = "quiz-stats-v1"
 export const ATTEMPTS_KEY = "quiz-attempts-v1"
@@ -41,6 +42,7 @@ export function useStats(profileId: string | null) {
   useEffect(() => {
     if (!profileId) return
     localStorage.setItem(getStatsKey(profileId), JSON.stringify(stats))
+    notifyLocalDataChanged()
   }, [profileId, stats])
 
   const record = useCallback((isCorrect: boolean) => {
@@ -55,6 +57,7 @@ export function useStats(profileId: string | null) {
     if (profileId) {
       localStorage.setItem(getStatsKey(profileId), JSON.stringify(emptyStats))
       localStorage.removeItem(getAttemptsStorageKey(profileId))
+      notifyLocalDataChanged()
     }
     setStats(emptyStats)
   }, [profileId])

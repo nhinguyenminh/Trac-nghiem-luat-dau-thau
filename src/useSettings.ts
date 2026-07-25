@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import type { PracticeMode, QuestionScope } from "./types"
+import { notifyLocalDataChanged } from "./services/CloudSyncService"
 
 export interface Settings {
   autoNext: boolean
@@ -64,6 +65,7 @@ export function useSettings(profileId: string | null) {
     if (!loaded) return
     if (!profileId) return
     localStorage.setItem(getStorageKey(profileId), JSON.stringify(settings))
+    notifyLocalDataChanged()
   }, [settings, loaded, profileId])
 
   const toggle = useCallback((key: keyof Settings) => {

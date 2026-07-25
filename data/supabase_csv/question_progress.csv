@@ -1,0 +1,2 @@
+user_id,profile_id,question_id,status,correct_count,wrong_count,total_response_time_ms,last_result,last_response_time_ms,last_updated
+aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,11111111-1111-1111-1111-111111111111,1,correct,3,1,21500,correct,4200,2026-07-25T00:00:00.000Z

@@ -1,4 +1,5 @@
 import type { QuestionProgress } from "../types"
+import { notifyLocalDataChanged } from "./CloudSyncService"
 
 const STORAGE_KEY = "quiz-progress-v2"
 
@@ -79,6 +80,7 @@ export function writeProgress(profileId: string | null, progress: QuestionProgre
     lastUpdated: item.lastUpdated ? item.lastUpdated.toISOString() : null,
   }))
   localStorage.setItem(getStorageKey(profileId), JSON.stringify(stored))
+  notifyLocalDataChanged()
 }
 
 export function getQuestionProgress(progress: QuestionProgress[], questionId: number): QuestionProgress {
