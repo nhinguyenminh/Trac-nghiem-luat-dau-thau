@@ -43,7 +43,7 @@ export default function MockExamPage() {
   const [error, setError] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [focusedQuestionId, setFocusedQuestionId] = useState<number | null>(null)
   const [timeLeftSeconds, setTimeLeftSeconds] = useState(EXAM_DURATION_SECONDS)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number | null>>({})
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({})
@@ -92,7 +92,6 @@ export default function MockExamPage() {
     return () => window.clearInterval(timer)
   }, [hasStarted, isSubmitted])
 
-  const currentQuestion = examQuestions[currentIndex] ?? null
   const selectedCount = useMemo(
     () => examQuestions.filter((q) => selectedAnswers[q.id] != null).length,
     [examQuestions, selectedAnswers],
@@ -104,7 +103,7 @@ export default function MockExamPage() {
     if (!confirmed) return
     setHasStarted(true)
     setIsSubmitted(false)
-    setCurrentIndex(0)
+    setFocusedQuestionId(examQuestions[0]?.id ?? null)
     setTimeLeftSeconds(EXAM_DURATION_SECONDS)
   }
 
@@ -125,7 +124,7 @@ export default function MockExamPage() {
     }
     setSelectedAnswers(initialAnswers)
     setFlaggedQuestions(initialFlags)
-    setCurrentIndex(0)
+    setFocusedQuestionId(selected[0]?.id ?? null)
     setTimeLeftSeconds(EXAM_DURATION_SECONDS)
     setHasStarted(false)
     setIsSubmitted(false)
@@ -140,7 +139,7 @@ export default function MockExamPage() {
     )
   }
 
-  if (error || examQuestions.length === 0 || !currentQuestion) {
+  if (error || examQuestions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-ms-red/30 bg-ms-red-light py-16 text-center">
         <AlertTriangle className="h-8 w-8 text-ms-red" />
@@ -212,81 +211,78 @@ export default function MockExamPage() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_270px]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <span className="rounded-full bg-ms-blue-soft px-3 py-1 text-xs font-semibold text-ms-blue-dark">
-              Câu {currentIndex + 1}/{examQuestions.length}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setFlaggedQuestions((prev) => ({ ...prev, [currentQuestion.id]: !prev[currentQuestion.id] }))
-              }}
-              className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
-                isFlagged
-                  ? "border-amber-300 bg-amber-50 text-amber-800"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <Flag className="h-3.5 w-3.5" /> {isFlagged ? "Đã đánh dấu" : "Đánh dấu nghi ngờ"}
-            </button>
-          </div>
-
-          <h3 className="text-lg font-semibold leading-relaxed text-slate-800">{currentQuestion.question}</h3>
-
-          <div className="mt-4 flex flex-col gap-3">
-            {currentQuestion.options.map((option, index) => {
-              const picked = selectedOption === index
-              const showResult = isSubmitted
-              const isCorrectAnswer = index === currentQuestion.answer
-
-              let styles = "border-slate-200 bg-white hover:border-ms-blue hover:bg-ms-blue-light"
-              if (picked) {
-                styles = "border-ms-blue bg-ms-blue-light"
-              }
-              if (showResult && isCorrectAnswer) {
-                styles = "border-ms-green bg-ms-green-light"
-              } else if (showResult && picked && !isCorrectAnswer) {
-                styles = "border-ms-red bg-ms-red-light"
-              }
-
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  disabled={!hasStarted || isSubmitted}
-                  onClick={() => {
-                    setSelectedAnswers((prev) => ({ ...prev, [currentQuestion.id]: index }))
-                  }}
-                  className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm transition-all sm:text-base ${styles} ${
-                    !hasStarted || isSubmitted ? "cursor-default" : "cursor-pointer"
-                  }`}
-                >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ms-blue-soft text-sm font-bold text-ms-blue-dark">
-                    {LETTERS[index]}
+        <section className="flex flex-col gap-4">
+          {examQuestions.map((question, index) => {
+            const selectedOption = selectedAnswers[question.id]
+            const isFlagged = flaggedQuestions[question.id]
+            return (
+              <article
+                key={question.id}
+                id={`mock-question-${question.id}`}
+                className={`rounded-2xl border bg-white p-5 shadow-sm ${
+                  focusedQuestionId === question.id ? "border-ms-blue" : "border-slate-200"
+                }`}
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="rounded-full bg-ms-blue-soft px-3 py-1 text-xs font-semibold text-ms-blue-dark">
+                    Câu {index + 1}/{examQuestions.length}
                   </span>
-                  <span>{option}</span>
-                </button>
-              )
-            })}
-          </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFlaggedQuestions((prev) => ({ ...prev, [question.id]: !prev[question.id] }))
+                    }}
+                    className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+                      isFlagged
+                        ? "border-amber-300 bg-amber-50 text-amber-800"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Flag className="h-3.5 w-3.5" /> {isFlagged ? "Đã đánh dấu" : "Đánh dấu nghi ngờ"}
+                  </button>
+                </div>
 
-          <div className="mt-5 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Câu trước
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrentIndex((prev) => Math.min(examQuestions.length - 1, prev + 1))}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Câu sau
-            </button>
-          </div>
+                <h3 className="text-lg font-semibold leading-relaxed text-slate-800">{question.question}</h3>
+
+                <div className="mt-4 flex flex-col gap-3">
+                  {question.options.map((option, optionIndex) => {
+                    const picked = selectedOption === optionIndex
+                    const showResult = isSubmitted
+                    const isCorrectAnswer = optionIndex === question.answer
+
+                    let styles = "border-slate-200 bg-white hover:border-ms-blue hover:bg-ms-blue-light"
+                    if (picked) {
+                      styles = "border-ms-blue bg-ms-blue-light"
+                    }
+                    if (showResult && isCorrectAnswer) {
+                      styles = "border-ms-green bg-ms-green-light"
+                    } else if (showResult && picked && !isCorrectAnswer) {
+                      styles = "border-ms-red bg-ms-red-light"
+                    }
+
+                    return (
+                      <button
+                        key={optionIndex}
+                        type="button"
+                        disabled={!hasStarted || isSubmitted}
+                        onClick={() => {
+                          setSelectedAnswers((prev) => ({ ...prev, [question.id]: optionIndex }))
+                        }}
+                        className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm transition-all sm:text-base ${styles} ${
+                          !hasStarted || isSubmitted ? "cursor-default" : "cursor-pointer"
+                        }`}
+                      >
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ms-blue-soft text-sm font-bold text-ms-blue-dark">
+                          {LETTERS[optionIndex]}
+                        </span>
+                        <span>{option}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </article>
+            )
+          })}
         </section>
 
         <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -295,13 +291,19 @@ export default function MockExamPage() {
             {examQuestions.map((question, index) => {
               const chosen = selectedAnswers[question.id] != null
               const flagged = flaggedQuestions[question.id]
-              const active = index === currentIndex
+              const active = focusedQuestionId === question.id
 
               return (
                 <button
                   key={question.id}
                   type="button"
-                  onClick={() => setCurrentIndex(index)}
+                  onClick={() => {
+                    setFocusedQuestionId(question.id)
+                    document.getElementById(`mock-question-${question.id}`)?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    })
+                  }}
                   className={`relative rounded-lg border-2 px-0 py-2 text-xs font-semibold ${
                     active
                       ? "border-ms-blue bg-ms-blue-light text-ms-blue-dark"
