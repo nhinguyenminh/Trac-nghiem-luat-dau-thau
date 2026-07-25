@@ -93,10 +93,6 @@ export default function MockExamPage() {
     return () => window.clearInterval(timer)
   }, [hasStarted, isSubmitted])
 
-  const selectedCount = useMemo(
-    () => examQuestions.filter((q) => selectedAnswers[q.id] != null).length,
-    [examQuestions, selectedAnswers],
-  )
   const score = useMemo(() => computeScore(examQuestions, selectedAnswers), [examQuestions, selectedAnswers])
 
   const scrollToQuestion = (questionId: number) => {
