@@ -46,7 +46,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     let disposed = false
     const unbind = bindCloudAutoSync()
     void reconcileCloudWithLocal()
-      .catch(() => undefined)
+      .catch((error) => {
+        console.warn("[cloud-sync] reconcile failed", error)
+      })
       .then(() => {
         if (disposed) return
         setProfiles(readProfiles())

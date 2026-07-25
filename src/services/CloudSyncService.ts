@@ -112,7 +112,10 @@ function getHeaders() {
 async function fetchTable<T>(table: string, userId: string): Promise<T[]> {
   const url = `${SUPABASE_URL}/rest/v1/${table}?user_id=eq.${encodeURIComponent(userId)}&select=*`
   const res = await fetch(url, { headers: getHeaders() })
-  if (!res.ok) throw new Error(`Fetch ${table} failed: ${res.status}`)
+  if (!res.ok) {
+    const body = await res.text().catch(() => "")
+    throw new Error(`Fetch ${table} failed: ${res.status} ${body}`)
+  }
   return (await res.json()) as T[]
 }
 
@@ -129,7 +132,10 @@ async function upsertRows<T>(table: string, rows: T[], onConflict: string) {
     body: JSON.stringify(rows),
   })
 
-  if (!res.ok) throw new Error(`Upsert ${table} failed: ${res.status}`)
+  if (!res.ok) {
+    const body = await res.text().catch(() => "")
+    throw new Error(`Upsert ${table} failed: ${res.status} ${body}`)
+  }
 }
 
 function parseJson<T>(raw: string | null, fallback: T): T {
