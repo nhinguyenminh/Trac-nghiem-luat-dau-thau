@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { AlertTriangle, Flag, Loader2 } from "lucide-react"
 import type { Question } from "../types"
 
 const EXAM_QUESTION_COUNT = 70
 const EXAM_DURATION_SECONDS = 60 * 60
 const LETTERS = ["A", "B", "C", "D"]
-const QUESTION_SCROLL_EXTRA_GAP = 16
+const QUESTION_SCROLL_OFFSET = 88
 
 function shuffle<T>(source: T[]): T[] {
   const arr = [...source]
@@ -38,7 +38,6 @@ function computeScore(examQuestions: Question[], selectedAnswers: Record<number,
 }
 
 export default function MockExamPage() {
-  const stickyHeaderRef = useRef<HTMLElement | null>(null)
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
   const [examQuestions, setExamQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
@@ -103,8 +102,7 @@ export default function MockExamPage() {
   const scrollToQuestion = (questionId: number) => {
     const element = document.getElementById(`mock-question-${questionId}`)
     if (!element) return
-    const stickyHeaderHeight = stickyHeaderRef.current?.getBoundingClientRect().height ?? 0
-    const top = element.getBoundingClientRect().top + window.scrollY - stickyHeaderHeight - QUESTION_SCROLL_EXTRA_GAP
+    const top = element.getBoundingClientRect().top + window.scrollY - QUESTION_SCROLL_OFFSET
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
   }
 
@@ -160,61 +158,6 @@ export default function MockExamPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section ref={stickyHeaderRef} className="sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-slate-900">Thi thử 70 câu</h1>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              60 phút • thang 100
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-right">
-              <p className="text-[10px] uppercase tracking-wide text-slate-500">Thời gian</p>
-              <p className={`text-base font-bold ${timeLeftSeconds <= 300 ? "text-ms-red" : "text-ms-blue-dark"}`}>
-                {formatTime(timeLeftSeconds)}
-              </p>
-            </div>
-
-            {!hasStarted && (
-              <button
-                type="button"
-                onClick={handleStart}
-                className="rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
-              >
-                Bắt đầu
-              </button>
-            )}
-            {hasStarted && !isSubmitted && (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
-              >
-                Nộp bài
-              </button>
-            )}
-            {isSubmitted && (
-              <button
-                type="button"
-                onClick={handleRestart}
-                className="rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
-              >
-                Đề mới
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <span className="rounded-lg bg-slate-100 px-3 py-1">Đã chọn: {selectedCount}/{examQuestions.length}</span>
-          <span className="rounded-lg bg-slate-100 px-3 py-1">
-            Đánh dấu: {Object.values(flaggedQuestions).filter(Boolean).length}
-          </span>
-        </div>
-      </section>
-
       {isSubmitted && (
         <section className="rounded-2xl border border-emerald-300 bg-emerald-50 p-5 shadow-sm">
           <h2 className="text-lg font-semibold text-emerald-900">Kết quả thi thử</h2>
@@ -229,6 +172,18 @@ export default function MockExamPage() {
           <p className="mt-2 text-sm text-slate-600">
             Câu hỏi sẽ chỉ hiển thị sau khi bạn bấm xác nhận bắt đầu làm bài.
           </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-slate-600">
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">70 câu</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">60 phút</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">Thang điểm 100</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleStart}
+            className="mt-5 rounded-lg bg-ms-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+          >
+            Xác nhận bắt đầu làm bài
+          </button>
         </section>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_270px]">
@@ -306,7 +261,38 @@ export default function MockExamPage() {
             })}
           </section>
 
-          <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-28 lg:self-start">
+          <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-6 lg:self-start">
+            <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-[10px] uppercase tracking-wide text-slate-500">Thời gian</p>
+              <p className={`mt-1 text-lg font-bold ${timeLeftSeconds <= 300 ? "text-ms-red" : "text-ms-blue-dark"}`}>
+                {formatTime(timeLeftSeconds)}
+              </p>
+              {!isSubmitted ? (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="mt-3 w-full rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+                >
+                  Nộp bài
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleRestart}
+                  className="mt-3 w-full rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+                >
+                  Tạo đề mới
+                </button>
+              )}
+            </div>
+
+            <div className="mb-3 flex flex-col gap-2 text-xs">
+              <span className="rounded-lg bg-slate-100 px-3 py-1">Đã chọn: {selectedCount}/{examQuestions.length}</span>
+              <span className="rounded-lg bg-slate-100 px-3 py-1">
+                Đánh dấu: {Object.values(flaggedQuestions).filter(Boolean).length}
+              </span>
+            </div>
+
             <h3 className="mb-3 text-sm font-semibold text-slate-800">Danh sách câu hỏi</h3>
             <div className="grid grid-cols-5 gap-2">
               {examQuestions.map((question, index) => {
