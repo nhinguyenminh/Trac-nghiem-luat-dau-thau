@@ -10,6 +10,7 @@ const CLOUD_SYNC_EVENT = "quiz-cloud-sync-local-change"
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.trim() ?? ""
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? ""
+let hasLoggedCloudConfigWarning = false
 
 interface LocalStats {
   total: number
@@ -87,6 +88,15 @@ interface CloudSettingsRow {
 
 function isSupabaseConfigured() {
   return SUPABASE_URL.length > 0 && SUPABASE_ANON_KEY.length > 0
+}
+
+function logCloudConfigWarning() {
+  if (hasLoggedCloudConfigWarning) return
+  hasLoggedCloudConfigWarning = true
+  console.warn("[cloud-sync] disabled: missing Supabase env", {
+    hasUrl: SUPABASE_URL.length > 0,
+    hasAnonKey: SUPABASE_ANON_KEY.length > 0,
+  })
 }
 
 function getOrCreateCloudUserId() {
@@ -388,7 +398,10 @@ export function isCloudSyncEnabled() {
 }
 
 export async function reconcileCloudWithLocal() {
-  if (!isSupabaseConfigured()) return
+  if (!isSupabaseConfigured()) {
+    logCloudConfigWarning()
+    return
+  }
   const userId = getOrCreateCloudUserId()
 
   const localSnapshot = readLocalSnapshot()
@@ -422,6 +435,7 @@ export async function pushCurrentLocalStateToCloud() {
 
 export function bindCloudAutoSync() {
   if (!isSupabaseConfigured()) {
+    logCloudConfigWarning()
     return () => undefined
   }
 
