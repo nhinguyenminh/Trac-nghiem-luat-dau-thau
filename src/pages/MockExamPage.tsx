@@ -148,9 +148,6 @@ export default function MockExamPage() {
     )
   }
 
-  const selectedOption = selectedAnswers[currentQuestion.id]
-  const isFlagged = flaggedQuestions[currentQuestion.id]
-
   return (
     <div className="flex flex-col gap-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
