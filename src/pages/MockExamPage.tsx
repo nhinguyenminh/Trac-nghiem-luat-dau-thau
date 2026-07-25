@@ -263,7 +263,7 @@ export default function MockExamPage() {
 
           <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-6 lg:self-start">
             <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-[10px] uppercase tracking-wide text-slate-500">Thời gian</p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-500">Thời gian còn lại</p>
               <p className={`mt-1 text-lg font-bold ${timeLeftSeconds <= 300 ? "text-ms-red" : "text-ms-blue-dark"}`}>
                 {formatTime(timeLeftSeconds)}
               </p>
