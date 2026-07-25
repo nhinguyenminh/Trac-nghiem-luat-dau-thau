@@ -207,123 +207,132 @@ export default function MockExamPage() {
         </section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_270px]">
-        <section className="flex flex-col gap-4">
-          {examQuestions.map((question, index) => {
-            const selectedOption = selectedAnswers[question.id]
-            const isFlagged = flaggedQuestions[question.id]
-            return (
-              <article
-                key={question.id}
-                id={`mock-question-${question.id}`}
-                className={`rounded-2xl border bg-white p-5 shadow-sm ${
-                  focusedQuestionId === question.id ? "border-ms-blue" : "border-slate-200"
-                }`}
-              >
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <span className="rounded-full bg-ms-blue-soft px-3 py-1 text-xs font-semibold text-ms-blue-dark">
-                    Câu {index + 1}/{examQuestions.length}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFlaggedQuestions((prev) => ({ ...prev, [question.id]: !prev[question.id] }))
-                    }}
-                    className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
-                      isFlagged
-                        ? "border-amber-300 bg-amber-50 text-amber-800"
-                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    <Flag className="h-3.5 w-3.5" /> {isFlagged ? "Đã đánh dấu" : "Đánh dấu nghi ngờ"}
-                  </button>
-                </div>
-
-                <h3 className="text-lg font-semibold leading-relaxed text-slate-800">{question.question}</h3>
-
-                <div className="mt-4 flex flex-col gap-3">
-                  {question.options.map((option, optionIndex) => {
-                    const picked = selectedOption === optionIndex
-                    const showResult = isSubmitted
-                    const isCorrectAnswer = optionIndex === question.answer
-
-                    let styles = "border-slate-200 bg-white hover:border-ms-blue hover:bg-ms-blue-light"
-                    if (picked) {
-                      styles = "border-ms-blue bg-ms-blue-light"
-                    }
-                    if (showResult && isCorrectAnswer) {
-                      styles = "border-ms-green bg-ms-green-light"
-                    } else if (showResult && picked && !isCorrectAnswer) {
-                      styles = "border-ms-red bg-ms-red-light"
-                    }
-
-                    return (
-                      <button
-                        key={optionIndex}
-                        type="button"
-                        disabled={!hasStarted || isSubmitted}
-                        onClick={() => {
-                          setSelectedAnswers((prev) => ({ ...prev, [question.id]: optionIndex }))
-                        }}
-                        className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm transition-all sm:text-base ${styles} ${
-                          !hasStarted || isSubmitted ? "cursor-default" : "cursor-pointer"
-                        }`}
-                      >
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ms-blue-soft text-sm font-bold text-ms-blue-dark">
-                          {LETTERS[optionIndex]}
-                        </span>
-                        <span>{option}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </article>
-            )
-          })}
+      {!hasStarted ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">Sẵn sàng bắt đầu thi thử</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Câu hỏi sẽ chỉ hiển thị sau khi bạn bấm xác nhận bắt đầu làm bài.
+          </p>
         </section>
-
-        <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:self-start">
-          <h3 className="mb-3 text-sm font-semibold text-slate-800">Danh sách câu hỏi</h3>
-          <div className="grid grid-cols-5 gap-2">
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[1fr_270px]">
+          <section className="flex flex-col gap-4">
             {examQuestions.map((question, index) => {
-              const chosen = selectedAnswers[question.id] != null
-              const flagged = flaggedQuestions[question.id]
-              const active = focusedQuestionId === question.id
-
+              const selectedOption = selectedAnswers[question.id]
+              const isFlagged = flaggedQuestions[question.id]
               return (
-                <button
+                <article
                   key={question.id}
-                  type="button"
-                  onClick={() => {
-                    setFocusedQuestionId(question.id)
-                    document.getElementById(`mock-question-${question.id}`)?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    })
-                  }}
-                  className={`relative rounded-lg border-2 px-0 py-2 text-xs font-semibold ${
-                    active
-                      ? "border-ms-blue bg-ms-blue-light text-ms-blue-dark"
-                      : chosen
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                        : "border-slate-200 bg-white text-slate-600"
+                  id={`mock-question-${question.id}`}
+                  className={`rounded-2xl border bg-white p-5 shadow-sm ${
+                    focusedQuestionId === question.id ? "border-ms-blue" : "border-slate-200"
                   }`}
-                  title={chosen ? "Đã chọn" : "Chưa chọn"}
                 >
-                  {index + 1}
-                  {flagged && <Flag className="absolute right-0.5 top-0.5 h-3 w-3 text-amber-500" />}
-                </button>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-ms-blue-soft px-3 py-1 text-xs font-semibold text-ms-blue-dark">
+                      Câu {index + 1}/{examQuestions.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFlaggedQuestions((prev) => ({ ...prev, [question.id]: !prev[question.id] }))
+                      }}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+                        isFlagged
+                          ? "border-amber-300 bg-amber-50 text-amber-800"
+                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Flag className="h-3.5 w-3.5" /> {isFlagged ? "Đã đánh dấu" : "Đánh dấu nghi ngờ"}
+                    </button>
+                  </div>
+
+                  <h3 className="text-lg font-semibold leading-relaxed text-slate-800">{question.question}</h3>
+
+                  <div className="mt-4 flex flex-col gap-3">
+                    {question.options.map((option, optionIndex) => {
+                      const picked = selectedOption === optionIndex
+                      const showResult = isSubmitted
+                      const isCorrectAnswer = optionIndex === question.answer
+
+                      let styles = "border-slate-200 bg-white hover:border-ms-blue hover:bg-ms-blue-light"
+                      if (picked) {
+                        styles = "border-ms-blue bg-ms-blue-light"
+                      }
+                      if (showResult && isCorrectAnswer) {
+                        styles = "border-ms-green bg-ms-green-light"
+                      } else if (showResult && picked && !isCorrectAnswer) {
+                        styles = "border-ms-red bg-ms-red-light"
+                      }
+
+                      return (
+                        <button
+                          key={optionIndex}
+                          type="button"
+                          disabled={!hasStarted || isSubmitted}
+                          onClick={() => {
+                            setSelectedAnswers((prev) => ({ ...prev, [question.id]: optionIndex }))
+                          }}
+                          className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm transition-all sm:text-base ${styles} ${
+                            !hasStarted || isSubmitted ? "cursor-default" : "cursor-pointer"
+                          }`}
+                        >
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ms-blue-soft text-sm font-bold text-ms-blue-dark">
+                            {LETTERS[optionIndex]}
+                          </span>
+                          <span>{option}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </article>
               )
             })}
-          </div>
+          </section>
 
-          <div className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
-            <p>• Xanh lá: đã chọn đáp án</p>
-            <p>• Trắng: chưa chọn</p>
-            <p>• Có cờ: câu đang nghi ngờ</p>
-          </div>
-        </aside>
-      </div>
+          <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:self-start">
+            <h3 className="mb-3 text-sm font-semibold text-slate-800">Danh sách câu hỏi</h3>
+            <div className="grid grid-cols-5 gap-2">
+              {examQuestions.map((question, index) => {
+                const chosen = selectedAnswers[question.id] != null
+                const flagged = flaggedQuestions[question.id]
+                const active = focusedQuestionId === question.id
+
+                return (
+                  <button
+                    key={question.id}
+                    type="button"
+                    onClick={() => {
+                      setFocusedQuestionId(question.id)
+                      document.getElementById(`mock-question-${question.id}`)?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      })
+                    }}
+                    className={`relative rounded-lg border-2 px-0 py-2 text-xs font-semibold ${
+                      active
+                        ? "border-ms-blue bg-ms-blue-light text-ms-blue-dark"
+                        : chosen
+                          ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                          : "border-slate-200 bg-white text-slate-600"
+                    }`}
+                    title={chosen ? "Đã chọn" : "Chưa chọn"}
+                  >
+                    {index + 1}
+                    {flagged && <Flag className="absolute right-0.5 top-0.5 h-3 w-3 text-amber-500" />}
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+              <p>• Xanh lá: đã chọn đáp án</p>
+              <p>• Trắng: chưa chọn</p>
+              <p>• Có cờ: câu đang nghi ngờ</p>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   )
 }
