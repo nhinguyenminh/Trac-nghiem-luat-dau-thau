@@ -5,6 +5,7 @@ import type { Question } from "../types"
 const EXAM_QUESTION_COUNT = 70
 const EXAM_DURATION_SECONDS = 60 * 60
 const LETTERS = ["A", "B", "C", "D"]
+const QUESTION_SCROLL_OFFSET = 132
 
 function shuffle<T>(source: T[]): T[] {
   const arr = [...source]
@@ -98,6 +99,13 @@ export default function MockExamPage() {
   )
   const score = useMemo(() => computeScore(examQuestions, selectedAnswers), [examQuestions, selectedAnswers])
 
+  const scrollToQuestion = (questionId: number) => {
+    const element = document.getElementById(`mock-question-${questionId}`)
+    if (!element) return
+    const top = element.getBoundingClientRect().top + window.scrollY - QUESTION_SCROLL_OFFSET
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
+  }
+
   const handleStart = () => {
     const confirmed = window.confirm("Bài thi thử gồm 70 câu trong 60 phút. Bạn có chắc muốn bắt đầu?")
     if (!confirmed) return
@@ -150,52 +158,58 @@ export default function MockExamPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-sm backdrop-blur">
+      <section className="sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-semibold text-slate-900">Thi thử 70 câu</h1>
-            <p className="text-sm text-slate-600">Thời gian 60 phút. Thang điểm 100.</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-slate-900">Thi thử 70 câu</h1>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+              60 phút • thang 100
+            </span>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-right">
-            <p className="text-xs uppercase text-slate-500">Thời gian còn lại</p>
-            <p className={`text-lg font-bold ${timeLeftSeconds <= 300 ? "text-ms-red" : "text-ms-blue-dark"}`}>
-              {formatTime(timeLeftSeconds)}
-            </p>
+
+          <div className="flex items-center gap-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-right">
+              <p className="text-[10px] uppercase tracking-wide text-slate-500">Thời gian</p>
+              <p className={`text-base font-bold ${timeLeftSeconds <= 300 ? "text-ms-red" : "text-ms-blue-dark"}`}>
+                {formatTime(timeLeftSeconds)}
+              </p>
+            </div>
+
+            {!hasStarted && (
+              <button
+                type="button"
+                onClick={handleStart}
+                className="rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+              >
+                Bắt đầu
+              </button>
+            )}
+            {hasStarted && !isSubmitted && (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+              >
+                Nộp bài
+              </button>
+            )}
+            {isSubmitted && (
+              <button
+                type="button"
+                onClick={handleRestart}
+                className="rounded-lg bg-ms-blue px-4 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+              >
+                Đề mới
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
           <span className="rounded-lg bg-slate-100 px-3 py-1">Đã chọn: {selectedCount}/{examQuestions.length}</span>
           <span className="rounded-lg bg-slate-100 px-3 py-1">
             Đánh dấu: {Object.values(flaggedQuestions).filter(Boolean).length}
           </span>
-          {!hasStarted && (
-            <button
-              type="button"
-              onClick={handleStart}
-              className="ml-auto rounded-lg bg-ms-blue px-4 py-2 font-semibold text-white hover:bg-ms-blue-dark"
-            >
-              Xác nhận bắt đầu làm bài
-            </button>
-          )}
-          {hasStarted && !isSubmitted && (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="ml-auto rounded-lg bg-rose-600 px-4 py-2 font-semibold text-white hover:bg-rose-700"
-            >
-              Nộp bài
-            </button>
-          )}
-          {isSubmitted && (
-            <button
-              type="button"
-              onClick={handleRestart}
-              className="ml-auto rounded-lg bg-ms-blue px-4 py-2 font-semibold text-white hover:bg-ms-blue-dark"
-            >
-              Tạo đề thi mới
-            </button>
-          )}
         </div>
       </section>
 
@@ -224,7 +238,7 @@ export default function MockExamPage() {
                 <article
                   key={question.id}
                   id={`mock-question-${question.id}`}
-                  className={`rounded-2xl border bg-white p-5 shadow-sm ${
+                  className={`scroll-mt-36 rounded-2xl border bg-white p-5 shadow-sm ${
                     focusedQuestionId === question.id ? "border-ms-blue" : "border-slate-200"
                   }`}
                 >
@@ -290,7 +304,7 @@ export default function MockExamPage() {
             })}
           </section>
 
-          <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:self-start">
+          <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-28 lg:self-start">
             <h3 className="mb-3 text-sm font-semibold text-slate-800">Danh sách câu hỏi</h3>
             <div className="grid grid-cols-5 gap-2">
               {examQuestions.map((question, index) => {
@@ -304,10 +318,7 @@ export default function MockExamPage() {
                     type="button"
                     onClick={() => {
                       setFocusedQuestionId(question.id)
-                      document.getElementById(`mock-question-${question.id}`)?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      })
+                      scrollToQuestion(question.id)
                     }}
                     className={`relative rounded-lg border-2 px-0 py-2 text-xs font-semibold ${
                       active
