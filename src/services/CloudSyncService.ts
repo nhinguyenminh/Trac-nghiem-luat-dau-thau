@@ -429,8 +429,9 @@ export function bindCloudAutoSync() {
       pending = true
       try {
         await pushCurrentLocalStateToCloud()
-      } catch {
-        // Keep local-first behavior when cloud sync fails.
+      } catch (error) {
+        // Keep local-first behavior when cloud sync fails while exposing diagnostics.
+        console.warn("[cloud-sync] push failed", error)
       } finally {
         pending = false
       }
