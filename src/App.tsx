@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage"
 import ProfilePage from "./pages/ProfilePage"
 import PracticePage from "./pages/PracticePage"
 import QuizPage from "./pages/QuizPage"
+import MockExamPage from "./pages/MockExamPage"
 import { getCloudSyncDebugStatus } from "./services/CloudSyncService"
 
 function Header() {
@@ -39,7 +40,15 @@ function Header() {
               pathname === "/quiz" ? "bg-white/20" : "hover:bg-white/10"
             }`}
           >
-            Luyện thi
+            Ôn tập
+          </Link>
+          <Link
+            to="/mock-exam"
+            className={`rounded-md px-3 py-1.5 transition-colors ${
+              pathname === "/mock-exam" ? "bg-white/20" : "hover:bg-white/10"
+            }`}
+          >
+            Thi thử
           </Link>
           <Link
             to="/profile"
@@ -65,6 +74,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/mock-exam" element={<MockExamPage />} />
           <Route path="/practice/:questionId" element={<PracticePage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
@@ -73,7 +83,7 @@ export default function App() {
         <div>Ứng dụng luyện thi chứng chỉ đấu thầu &middot; Làm bài không giới hạn</div>
         <div className="mt-1">
           Cloud sync: {cloudStatus.enabled ? "ON" : "OFF"}
-          {!cloudStatus.enabled && ` (hasUrl=${cloudStatus.hasUrl ? "yes" : "no"}, hasAnonKey=${cloudStatus.hasAnonKey ? "yes" : "no"})`}
+          {` (hasUrl=${cloudStatus.hasUrl ? "yes" : "no"}, hasAnonKey=${cloudStatus.hasAnonKey ? "yes" : "no"}, hasAuth=${cloudStatus.hasAuthSession ? "yes" : "no"})`}
         </div>
       </footer>
       <Analytics />

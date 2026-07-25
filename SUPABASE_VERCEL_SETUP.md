@@ -29,7 +29,17 @@ Ensure these are done in Supabase:
 - RLS enabled on profiles, question_progress, stats, settings
 - Policies allow rows where user_id = auth.uid() if using Supabase Auth
 
-## 5) Current app behavior
+## 5) Supabase Auth mode (recommended production)
+
+- Go to Profile page in app and sign in/up using email + password for cloud auth.
+- Confirm footer shows hasAuth=yes.
+- After verifying sync works, run:
+
+	- [data/supabase_sql/003_enable_auth_uid_policies.sql](data/supabase_sql/003_enable_auth_uid_policies.sql)
+
+This removes temporary anon-wide access and enforces owner-only access by auth.uid().
+
+## 6) Current app behavior
 The app is local-first:
 
 - Still writes localStorage immediately

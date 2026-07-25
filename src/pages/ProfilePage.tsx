@@ -3,6 +3,13 @@ import { Link } from "react-router-dom"
 import { CheckCircle2, XCircle, Circle, LogOut, UserPlus, Trash2, LogIn } from "lucide-react"
 import { getQuestionProgress, readProgress } from "../services/ProgressService"
 import { getProgressSummary } from "../services/ProfileService"
+import { getCloudSyncDebugStatus, reconcileCloudWithLocal } from "../services/CloudSyncService"
+import {
+  clearSupabaseAuthSession,
+  getSupabaseAuthSession,
+  signInWithSupabase,
+  signUpWithSupabase,
+} from "../services/SupabaseAuthService"
 import { useProfile } from "../contexts/ProfileContext"
 import type { Question, QuestionProgress, UserProfile } from "../types"
 
@@ -85,6 +92,12 @@ export default function ProfilePage() {
   const [createName, setCreateName] = useState("")
   const [createPassword, setCreatePassword] = useState("")
   const [createError, setCreateError] = useState<string | null>(null)
+  const [cloudEmail, setCloudEmail] = useState("")
+  const [cloudPassword, setCloudPassword] = useState("")
+  const [cloudMessage, setCloudMessage] = useState<string | null>(null)
+  const [cloudBusy, setCloudBusy] = useState(false)
+  const [cloudAuthSession, setCloudAuthSession] = useState(() => getSupabaseAuthSession())
+  const cloudStatus = getCloudSyncDebugStatus()
 
   useEffect(() => {
     setProgress(readProgress(activeProfile?.id ?? null))
@@ -134,6 +147,10 @@ export default function ProfilePage() {
       .slice(0, 10)
   }, [questions, progress])
 
+  const refreshCloudAuthState = () => {
+    setCloudAuthSession(getSupabaseAuthSession())
+  }
+
   const renderQuestionGrid = (items: Question[]) => (
     <div className="grid max-h-[50vh] grid-cols-5 gap-2 overflow-y-auto rounded-xl border border-slate-200 p-3 sm:grid-cols-10">
       {items.map((question) => {
@@ -180,6 +197,109 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900">Tài khoản cloud (Supabase Auth)</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Đăng nhập email để đồng bộ dữ liệu giữa nhiều máy theo chuẩn production.
+        </p>
+
+        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          Cloud sync: {cloudStatus.enabled ? "ON" : "OFF"} · hasUrl={cloudStatus.hasUrl ? "yes" : "no"} · hasAnonKey={cloudStatus.hasAnonKey ? "yes" : "no"} · hasAuth={cloudStatus.hasAuthSession ? "yes" : "no"}
+        </div>
+
+        <form
+          className="mt-4 grid gap-2 sm:grid-cols-3"
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (cloudBusy) return
+            setCloudBusy(true)
+            setCloudMessage(null)
+            void signInWithSupabase(cloudEmail.trim(), cloudPassword)
+              .then(async () => {
+                refreshCloudAuthState()
+                await reconcileCloudWithLocal()
+                setCloudMessage("Đăng nhập cloud thành công, đã đồng bộ dữ liệu")
+              })
+              .catch((error) => {
+                setCloudMessage(error instanceof Error ? error.message : "Đăng nhập cloud thất bại")
+              })
+              .finally(() => {
+                setCloudBusy(false)
+              })
+          }}
+        >
+          <input
+            type="email"
+            value={cloudEmail}
+            onChange={(event) => setCloudEmail(event.target.value)}
+            placeholder="Email Supabase"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            type="password"
+            value={cloudPassword}
+            onChange={(event) => setCloudPassword(event.target.value)}
+            placeholder="Mật khẩu Supabase"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={cloudBusy}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <LogIn className="h-4 w-4" /> Đăng nhập cloud
+          </button>
+        </form>
+
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={cloudBusy}
+            onClick={() => {
+              setCloudBusy(true)
+              setCloudMessage(null)
+              void signUpWithSupabase(cloudEmail.trim(), cloudPassword)
+                .then(async (session) => {
+                  refreshCloudAuthState()
+                  if (session) {
+                    await reconcileCloudWithLocal()
+                    setCloudMessage("Đăng ký và đăng nhập cloud thành công")
+                    return
+                  }
+                  setCloudMessage("Đăng ký thành công. Kiểm tra email xác nhận rồi đăng nhập.")
+                })
+                .catch((error) => {
+                  setCloudMessage(error instanceof Error ? error.message : "Đăng ký cloud thất bại")
+                })
+                .finally(() => {
+                  setCloudBusy(false)
+                })
+            }}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Đăng ký cloud
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              clearSupabaseAuthSession()
+              refreshCloudAuthState()
+              setCloudMessage("Đã đăng xuất cloud")
+            }}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Đăng xuất cloud
+          </button>
+          {cloudAuthSession && (
+            <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+              Đang đăng nhập: {cloudAuthSession.email ?? cloudAuthSession.userId}
+            </span>
+          )}
+        </div>
+
+        {cloudMessage && <p className="mt-2 text-xs text-slate-600">{cloudMessage}</p>}
+      </section>
+
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-slate-900">Quản lý profile</h1>

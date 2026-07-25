@@ -1,2 +1,1 @@
 id,user_id,name,password_hash,created_at,last_login_at
-11111111-1111-1111-1111-111111111111,aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,Hung,$2b$10$replace_with_bcrypt_hash,2026-07-25T00:00:00.000Z,2026-07-25T00:00:00.000Z

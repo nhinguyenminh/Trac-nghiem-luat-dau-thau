@@ -43,7 +43,14 @@ export default function HomePage() {
           className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-ms-blue-dark shadow transition-transform hover:scale-105"
         >
           <Play className="h-4 w-4" fill="currentColor" />
-          Bắt đầu luyện thi
+          Bắt đầu ôn tập
+        </Link>
+        <Link
+          to="/mock-exam"
+          className="mt-3 inline-flex items-center gap-2 rounded-lg border border-white/40 bg-transparent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          <Play className="h-4 w-4" fill="currentColor" />
+          Vào thi thử 70 câu
         </Link>
         {count !== null && (
           <p className="mt-3 text-xs text-white/80">Ngân hàng câu hỏi: {count} câu</p>

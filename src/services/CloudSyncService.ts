@@ -1,4 +1,5 @@
 import type { QuestionProgress } from "../types"
+import { getSupabaseAuthSession, getSupabaseAuthUserId, getSupabaseValidAccessToken } from "./SupabaseAuthService"
 
 const PROFILES_KEY = "quiz-profiles-v1"
 const ACTIVE_PROFILE_KEY = "quiz-active-profile-v1"
@@ -16,6 +17,7 @@ export interface CloudSyncDebugStatus {
   enabled: boolean
   hasUrl: boolean
   hasAnonKey: boolean
+  hasAuthSession: boolean
 }
 
 interface LocalStats {
@@ -117,17 +119,18 @@ function getOrCreateCloudUserId() {
   return generated
 }
 
-function getHeaders() {
+async function getHeaders() {
+  const accessToken = await getSupabaseValidAccessToken()
   return {
     apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    Authorization: `Bearer ${accessToken ?? SUPABASE_ANON_KEY}`,
     "Content-Type": "application/json",
   }
 }
 
 async function fetchTable<T>(table: string, userId: string): Promise<T[]> {
   const url = `${SUPABASE_URL}/rest/v1/${table}?user_id=eq.${encodeURIComponent(userId)}&select=*`
-  const res = await fetch(url, { headers: getHeaders() })
+  const res = await fetch(url, { headers: await getHeaders() })
   if (!res.ok) {
     const body = await res.text().catch(() => "")
     throw new Error(`Fetch ${table} failed: ${res.status} ${body}`)
@@ -142,7 +145,7 @@ async function upsertRows<T>(table: string, rows: T[], onConflict: string) {
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      ...getHeaders(),
+      ...(await getHeaders()),
       Prefer: "resolution=merge-duplicates,return=minimal",
     },
     body: JSON.stringify(rows),
@@ -408,7 +411,12 @@ export function getCloudSyncDebugStatus(): CloudSyncDebugStatus {
     enabled: isSupabaseConfigured(),
     hasUrl: SUPABASE_URL.length > 0,
     hasAnonKey: SUPABASE_ANON_KEY.length > 0,
+    hasAuthSession: !!getSupabaseAuthSession(),
   }
+}
+
+function resolveCloudUserId() {
+  return getSupabaseAuthUserId() ?? getOrCreateCloudUserId()
 }
 
 export async function reconcileCloudWithLocal() {
@@ -416,7 +424,7 @@ export async function reconcileCloudWithLocal() {
     logCloudConfigWarning()
     return
   }
-  const userId = getOrCreateCloudUserId()
+  const userId = resolveCloudUserId()
 
   const localSnapshot = readLocalSnapshot()
   const cloudSnapshot = await pullCloudSnapshot(userId)
@@ -443,7 +451,7 @@ export async function reconcileCloudWithLocal() {
 
 export async function pushCurrentLocalStateToCloud() {
   if (!isSupabaseConfigured()) return
-  const userId = getOrCreateCloudUserId()
+  const userId = resolveCloudUserId()
   await pushLocalSnapshot(userId, readLocalSnapshot())
 }
 
