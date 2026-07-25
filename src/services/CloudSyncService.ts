@@ -12,6 +12,12 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.trim() ?? ""
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? ""
 let hasLoggedCloudConfigWarning = false
 
+export interface CloudSyncDebugStatus {
+  enabled: boolean
+  hasUrl: boolean
+  hasAnonKey: boolean
+}
+
 interface LocalStats {
   total: number
   correct: number
@@ -395,6 +401,14 @@ export function notifyLocalDataChanged() {
 
 export function isCloudSyncEnabled() {
   return isSupabaseConfigured()
+}
+
+export function getCloudSyncDebugStatus(): CloudSyncDebugStatus {
+  return {
+    enabled: isSupabaseConfigured(),
+    hasUrl: SUPABASE_URL.length > 0,
+    hasAnonKey: SUPABASE_ANON_KEY.length > 0,
+  }
 }
 
 export async function reconcileCloudWithLocal() {

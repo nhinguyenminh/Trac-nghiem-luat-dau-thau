@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage"
 import ProfilePage from "./pages/ProfilePage"
 import PracticePage from "./pages/PracticePage"
 import QuizPage from "./pages/QuizPage"
+import { getCloudSyncDebugStatus } from "./services/CloudSyncService"
 
 function Header() {
   const { pathname } = useLocation()
@@ -55,6 +56,8 @@ function Header() {
 }
 
 export default function App() {
+  const cloudStatus = getCloudSyncDebugStatus()
+
   return (
     <div className="flex min-h-full flex-col bg-slate-50 text-slate-800">
       <Header />
@@ -67,7 +70,11 @@ export default function App() {
         </Routes>
       </main>
       <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        Ứng dụng luyện thi chứng chỉ đấu thầu &middot; Làm bài không giới hạn
+        <div>Ứng dụng luyện thi chứng chỉ đấu thầu &middot; Làm bài không giới hạn</div>
+        <div className="mt-1">
+          Cloud sync: {cloudStatus.enabled ? "ON" : "OFF"}
+          {!cloudStatus.enabled && ` (hasUrl=${cloudStatus.hasUrl ? "yes" : "no"}, hasAnonKey=${cloudStatus.hasAnonKey ? "yes" : "no"})`}
+        </div>
       </footer>
       <Analytics />
     </div>
