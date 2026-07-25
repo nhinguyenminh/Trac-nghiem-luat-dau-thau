@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { CheckCircle2, XCircle, Circle, LogOut, UserPlus, Trash2, LogIn } from "lucide-react"
+import { CheckCircle2, XCircle, Circle, LogOut, UserPlus, LogIn } from "lucide-react"
 import { getQuestionProgress, readProgress } from "../services/ProgressService"
 import { getProgressSummary } from "../services/ProfileService"
 import { getCloudSyncDebugStatus, reconcileCloudWithLocal } from "../services/CloudSyncService"
@@ -23,7 +23,7 @@ function formatDuration(ms: number): string {
 }
 
 export default function ProfilePage() {
-  const { profiles, activeProfile, createProfile, login, resetPassword, logout, deleteProfile } = useProfile()
+  const { activeProfile, createProfile, login, resetPassword, logout } = useProfile()
   const [questions, setQuestions] = useState<Question[]>([])
   const [progress, setProgress] = useState<QuestionProgress[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +33,7 @@ export default function ProfilePage() {
   const [createConfirmPassword, setCreateConfirmPassword] = useState("")
   const [createError, setCreateError] = useState<string | null>(null)
   const [createSuccess, setCreateSuccess] = useState<string | null>(null)
+  const [authView, setAuthView] = useState<"login" | "signup" | "forgot">("login")
   const [loginName, setLoginName] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -252,16 +253,10 @@ export default function ProfilePage() {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-slate-900">Quản lý profile</h1>
-          {activeProfile ? (
-            <button
-              type="button"
-              onClick={logout}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              <LogOut className="h-4 w-4" /> Đăng xuất
-            </button>
-          ) : (
+          {!activeProfile ? (
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">Chưa đăng nhập</span>
+          ) : (
+            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Đã đăng nhập</span>
           )}
         </div>
 
@@ -289,198 +284,217 @@ export default function ProfilePage() {
         )}
 
         {!activeProfile && (
-          <div className="grid gap-3 lg:grid-cols-3">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <h2 className="mb-2 text-sm font-semibold text-slate-800">Đăng ký</h2>
-            <div className="flex flex-col gap-2">
-              <input
-                value={createName}
-                onChange={(event) => {
-                  setCreateName(event.target.value)
-                  if (createError) setCreateError(null)
-                  if (createSuccess) setCreateSuccess(null)
-                }}
-                placeholder="Tên đăng nhập"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="password"
-                value={createPassword}
-                onChange={(event) => {
-                  setCreatePassword(event.target.value)
-                  if (createError) setCreateError(null)
-                  if (createSuccess) setCreateSuccess(null)
-                }}
-                placeholder="Mật khẩu"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="password"
-                value={createConfirmPassword}
-                onChange={(event) => {
-                  setCreateConfirmPassword(event.target.value)
-                  if (createError) setCreateError(null)
-                  if (createSuccess) setCreateSuccess(null)
-                }}
-                placeholder="Xác nhận mật khẩu"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (createPassword !== createConfirmPassword) {
-                    setCreateError("Mật khẩu xác nhận không khớp")
-                    setCreateSuccess(null)
-                    return
-                  }
-                  const result = createProfile(createName, createPassword)
-                  if (!result.ok) {
-                    setCreateError(result.error ?? "Không thể tạo profile")
-                    setCreateSuccess(null)
-                    return
-                  }
-                  setCreateName("")
-                  setCreatePassword("")
-                  setCreateConfirmPassword("")
-                  setCreateError(null)
-                  setCreateSuccess("Đăng ký thành công")
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
-              >
-                <UserPlus className="h-4 w-4" /> Tạo tài khoản
-              </button>
-            </div>
-            {createError && <p className="mt-2 text-xs text-rose-600">{createError}</p>}
-            {createSuccess && <p className="mt-2 text-xs text-emerald-700">{createSuccess}</p>}
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <h2 className="mb-2 text-sm font-semibold text-slate-800">Đăng nhập</h2>
-            <div className="flex flex-col gap-2">
-              <input
-                value={loginName}
-                onChange={(event) => {
-                  setLoginName(event.target.value)
-                  if (loginError) setLoginError(null)
-                }}
-                placeholder="Tên đăng nhập"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="password"
-                value={loginPassword}
-                onChange={(event) => {
-                  setLoginPassword(event.target.value)
-                  if (loginError) setLoginError(null)
-                }}
-                placeholder="Mật khẩu"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  const result = login(loginName, loginPassword)
-                  if (!result.ok) {
-                    setLoginError(result.error ?? "Đăng nhập thất bại")
-                    return
-                  }
-                  setLoginPassword("")
-                  setLoginError(null)
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
-              >
-                <LogIn className="h-4 w-4" /> Đăng nhập
-              </button>
-            </div>
-            {loginError && <p className="mt-2 text-xs text-rose-600">{loginError}</p>}
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <h2 className="mb-2 text-sm font-semibold text-slate-800">Quên mật khẩu</h2>
-            <div className="flex flex-col gap-2">
-              <input
-                value={forgotName}
-                onChange={(event) => {
-                  setForgotName(event.target.value)
-                  if (forgotError) setForgotError(null)
-                  if (forgotSuccess) setForgotSuccess(null)
-                }}
-                placeholder="Tên đăng nhập"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="password"
-                value={forgotPassword}
-                onChange={(event) => {
-                  setForgotPassword(event.target.value)
-                  if (forgotError) setForgotError(null)
-                  if (forgotSuccess) setForgotSuccess(null)
-                }}
-                placeholder="Mật khẩu mới"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="password"
-                value={forgotConfirmPassword}
-                onChange={(event) => {
-                  setForgotConfirmPassword(event.target.value)
-                  if (forgotError) setForgotError(null)
-                  if (forgotSuccess) setForgotSuccess(null)
-                }}
-                placeholder="Xác nhận mật khẩu mới"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (forgotPassword !== forgotConfirmPassword) {
-                    setForgotError("Mật khẩu xác nhận không khớp")
-                    setForgotSuccess(null)
-                    return
-                  }
-                  const result = resetPassword(forgotName, forgotPassword)
-                  if (!result.ok) {
-                    setForgotError(result.error ?? "Không thể đặt lại mật khẩu")
-                    setForgotSuccess(null)
-                    return
-                  }
-                  setForgotPassword("")
-                  setForgotConfirmPassword("")
-                  setForgotError(null)
-                  setForgotSuccess("Đặt lại mật khẩu thành công")
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-              >
-                Đặt lại mật khẩu
-              </button>
-            </div>
-            {forgotError && <p className="mt-2 text-xs text-rose-600">{forgotError}</p>}
-            {forgotSuccess && <p className="mt-2 text-xs text-emerald-700">{forgotSuccess}</p>}
-          </div>
-          </div>
-        )}
-
-        {!activeProfile && (
-          <div className="mt-4 flex flex-col gap-2">
-            {profiles.map((profile) => (
-              <div key={profile.id} className="rounded-xl border border-slate-200 bg-white p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{profile.name}</p>
-                    <p className="text-xs text-slate-500">
-                      Lần đăng nhập cuối: {new Date(profile.lastLoginAt).toLocaleString("vi-VN")}
-                    </p>
-                  </div>
+          <div className="mx-auto w-full max-w-md rounded-xl border border-slate-200 bg-slate-50 p-4">
+            {authView === "login" && (
+              <>
+                <h2 className="mb-2 text-sm font-semibold text-slate-800">Đăng nhập</h2>
+                <div className="flex flex-col gap-2">
+                  <input
+                    value={loginName}
+                    onChange={(event) => {
+                      setLoginName(event.target.value)
+                      if (loginError) setLoginError(null)
+                    }}
+                    placeholder="Tên đăng nhập"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(event) => {
+                      setLoginPassword(event.target.value)
+                      if (loginError) setLoginError(null)
+                    }}
+                    placeholder="Mật khẩu"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
                   <button
                     type="button"
-                    onClick={() => deleteProfile(profile.id)}
-                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-rose-300 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+                    onClick={() => {
+                      const result = login(loginName, loginPassword)
+                      if (!result.ok) {
+                        setLoginError(result.error ?? "Đăng nhập thất bại")
+                        return
+                      }
+                      setLoginPassword("")
+                      setLoginError(null)
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
                   >
-                    <Trash2 className="h-4 w-4" /> Xóa
+                    <LogIn className="h-4 w-4" /> Đăng nhập
                   </button>
                 </div>
-              </div>
-            ))}
+                {loginError && <p className="mt-2 text-xs text-rose-600">{loginError}</p>}
+
+                <div className="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthView("signup")
+                      setLoginError(null)
+                    }}
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Đăng ký
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthView("forgot")
+                      setLoginError(null)
+                    }}
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Quên mật khẩu
+                  </button>
+                </div>
+              </>
+            )}
+
+            {authView === "signup" && (
+              <>
+                <h2 className="mb-2 text-sm font-semibold text-slate-800">Đăng ký</h2>
+                <div className="flex flex-col gap-2">
+                  <input
+                    value={createName}
+                    onChange={(event) => {
+                      setCreateName(event.target.value)
+                      if (createError) setCreateError(null)
+                      if (createSuccess) setCreateSuccess(null)
+                    }}
+                    placeholder="Tên đăng nhập"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="password"
+                    value={createPassword}
+                    onChange={(event) => {
+                      setCreatePassword(event.target.value)
+                      if (createError) setCreateError(null)
+                      if (createSuccess) setCreateSuccess(null)
+                    }}
+                    placeholder="Mật khẩu"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="password"
+                    value={createConfirmPassword}
+                    onChange={(event) => {
+                      setCreateConfirmPassword(event.target.value)
+                      if (createError) setCreateError(null)
+                      if (createSuccess) setCreateSuccess(null)
+                    }}
+                    placeholder="Xác nhận mật khẩu"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (createPassword !== createConfirmPassword) {
+                        setCreateError("Mật khẩu xác nhận không khớp")
+                        setCreateSuccess(null)
+                        return
+                      }
+                      const result = createProfile(createName, createPassword)
+                      if (!result.ok) {
+                        setCreateError(result.error ?? "Không thể tạo profile")
+                        setCreateSuccess(null)
+                        return
+                      }
+                      setCreateName("")
+                      setCreatePassword("")
+                      setCreateConfirmPassword("")
+                      setCreateError(null)
+                      setCreateSuccess("Đăng ký thành công")
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+                  >
+                    <UserPlus className="h-4 w-4" /> Tạo tài khoản
+                  </button>
+                </div>
+                {createError && <p className="mt-2 text-xs text-rose-600">{createError}</p>}
+                {createSuccess && <p className="mt-2 text-xs text-emerald-700">{createSuccess}</p>}
+                <button
+                  type="button"
+                  onClick={() => setAuthView("login")}
+                  className="mt-3 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  Quay lại đăng nhập
+                </button>
+              </>
+            )}
+
+            {authView === "forgot" && (
+              <>
+                <h2 className="mb-2 text-sm font-semibold text-slate-800">Quên mật khẩu</h2>
+                <div className="flex flex-col gap-2">
+                  <input
+                    value={forgotName}
+                    onChange={(event) => {
+                      setForgotName(event.target.value)
+                      if (forgotError) setForgotError(null)
+                      if (forgotSuccess) setForgotSuccess(null)
+                    }}
+                    placeholder="Tên đăng nhập"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="password"
+                    value={forgotPassword}
+                    onChange={(event) => {
+                      setForgotPassword(event.target.value)
+                      if (forgotError) setForgotError(null)
+                      if (forgotSuccess) setForgotSuccess(null)
+                    }}
+                    placeholder="Mật khẩu mới"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <input
+                    type="password"
+                    value={forgotConfirmPassword}
+                    onChange={(event) => {
+                      setForgotConfirmPassword(event.target.value)
+                      if (forgotError) setForgotError(null)
+                      if (forgotSuccess) setForgotSuccess(null)
+                    }}
+                    placeholder="Xác nhận mật khẩu mới"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (forgotPassword !== forgotConfirmPassword) {
+                        setForgotError("Mật khẩu xác nhận không khớp")
+                        setForgotSuccess(null)
+                        return
+                      }
+                      const result = resetPassword(forgotName, forgotPassword)
+                      if (!result.ok) {
+                        setForgotError(result.error ?? "Không thể đặt lại mật khẩu")
+                        setForgotSuccess(null)
+                        return
+                      }
+                      setForgotPassword("")
+                      setForgotConfirmPassword("")
+                      setForgotError(null)
+                      setForgotSuccess("Đặt lại mật khẩu thành công")
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Đặt lại mật khẩu
+                  </button>
+                </div>
+                {forgotError && <p className="mt-2 text-xs text-rose-600">{forgotError}</p>}
+                {forgotSuccess && <p className="mt-2 text-xs text-emerald-700">{forgotSuccess}</p>}
+                <button
+                  type="button"
+                  onClick={() => setAuthView("login")}
+                  className="mt-3 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  Quay lại đăng nhập
+                </button>
+              </>
+            )}
           </div>
         )}
       </section>
