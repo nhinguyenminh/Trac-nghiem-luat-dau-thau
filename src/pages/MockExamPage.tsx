@@ -286,13 +286,6 @@ export default function MockExamPage() {
               )}
             </div>
 
-            <div className="mb-3 flex flex-col gap-2 text-xs">
-              <span className="rounded-lg bg-slate-100 px-3 py-1">Đã chọn: {selectedCount}/{examQuestions.length}</span>
-              <span className="rounded-lg bg-slate-100 px-3 py-1">
-                Đánh dấu: {Object.values(flaggedQuestions).filter(Boolean).length}
-              </span>
-            </div>
-
             <h3 className="mb-3 text-sm font-semibold text-slate-800">Danh sách câu hỏi</h3>
             <div className="grid grid-cols-5 gap-2">
               {examQuestions.map((question, index) => {
