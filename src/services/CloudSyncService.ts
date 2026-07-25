@@ -11,8 +11,6 @@ const CLOUD_SYNC_EVENT = "quiz-cloud-sync-local-change"
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.trim() ?? ""
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? ""
 
-type JsonObject = Record<string, unknown>
-
 interface LocalStats {
   total: number
   correct: number
@@ -118,7 +116,7 @@ async function fetchTable<T>(table: string, userId: string): Promise<T[]> {
   return (await res.json()) as T[]
 }
 
-async function upsertRows<T extends JsonObject>(table: string, rows: T[], onConflict: string) {
+async function upsertRows<T>(table: string, rows: T[], onConflict: string) {
   if (rows.length === 0) return
 
   const url = `${SUPABASE_URL}/rest/v1/${table}?on_conflict=${encodeURIComponent(onConflict)}`
