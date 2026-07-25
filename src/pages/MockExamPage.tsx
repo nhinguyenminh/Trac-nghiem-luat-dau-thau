@@ -150,7 +150,7 @@ export default function MockExamPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold text-slate-900">Thi thử 70 câu</h1>
@@ -282,9 +282,9 @@ export default function MockExamPage() {
           })}
         </section>
 
-        <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:self-start">
           <h3 className="mb-3 text-sm font-semibold text-slate-800">Danh sách câu hỏi</h3>
-          <div className="grid max-h-[60vh] grid-cols-5 gap-2 overflow-y-auto">
+          <div className="grid grid-cols-5 gap-2">
             {examQuestions.map((question, index) => {
               const chosen = selectedAnswers[question.id] != null
               const flagged = flaggedQuestions[question.id]
