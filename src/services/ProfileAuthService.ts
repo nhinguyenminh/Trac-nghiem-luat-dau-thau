@@ -100,25 +100,56 @@ export function createProfile(name: string, password: string): UserProfile {
   return nextProfile
 }
 
-export function loginProfile(profileId: string, password: string): UserProfile | null {
+export function loginProfileByName(name: string, password: string): UserProfile | null {
+  const normalizedName = name.trim().toLowerCase()
+  const normalizedPassword = password.trim()
+  if (!normalizedName || !normalizedPassword) return null
+
   const profiles = readProfiles()
-  const current = profiles.find((profile) => profile.id === profileId)
+  const current = profiles.find((profile) => profile.name.trim().toLowerCase() === normalizedName)
   if (!current) return null
-  if (current.password !== password) return null
+  if (current.password !== normalizedPassword) return null
 
   const updated: UserProfile = {
     ...current,
     lastLoginAt: new Date().toISOString(),
   }
 
-  const nextProfiles = profiles.map((profile) => (profile.id === profileId ? updated : profile))
+  const nextProfiles = profiles.map((profile) => (profile.id === updated.id ? updated : profile))
   writeStoredProfiles(nextProfiles)
-  writeActiveProfileId(profileId)
+  writeActiveProfileId(updated.id)
   return updated
 }
 
 export function logoutProfile() {
   writeActiveProfileId(null)
+}
+
+export function resetProfilePasswordByName(name: string, newPassword: string): UserProfile {
+  const normalizedName = name.trim().toLowerCase()
+  const normalizedPassword = newPassword.trim()
+  if (!normalizedName) {
+    throw new Error("Tên đăng nhập không được để trống")
+  }
+  if (!normalizedPassword) {
+    throw new Error("Mật khẩu mới không được để trống")
+  }
+
+  const profiles = readProfiles()
+  const current = profiles.find((profile) => profile.name.trim().toLowerCase() === normalizedName)
+  if (!current) {
+    throw new Error("Tên đăng nhập không tồn tại")
+  }
+
+  const updated: UserProfile = {
+    ...current,
+    password: normalizedPassword,
+    lastLoginAt: new Date().toISOString(),
+  }
+
+  const nextProfiles = profiles.map((profile) => (profile.id === updated.id ? updated : profile))
+  writeStoredProfiles(nextProfiles)
+  return updated
 }
 
 export function deleteProfile(profileId: string): UserProfile[] {

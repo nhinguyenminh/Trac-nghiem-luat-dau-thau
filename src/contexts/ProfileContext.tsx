@@ -5,7 +5,8 @@ import { bindCloudAutoSync, isCloudSyncEnabled, reconcileCloudWithLocal } from "
 import {
   createProfile as createProfileRecord,
   deleteProfile as deleteProfileRecord,
-  loginProfile as loginProfileRecord,
+  loginProfileByName as loginProfileRecord,
+  resetProfilePasswordByName as resetProfilePasswordRecord,
   logoutProfile as logoutProfileRecord,
   readActiveProfileId,
   readProfiles,
@@ -22,7 +23,8 @@ interface ProfileContextValue {
   profiles: UserProfile[]
   activeProfile: UserProfile | null
   createProfile: (name: string, password: string) => { ok: boolean; error?: string }
-  login: (profileId: string, password: string) => { ok: boolean; error?: string }
+  login: (name: string, password: string) => { ok: boolean; error?: string }
+  resetPassword: (name: string, newPassword: string) => { ok: boolean; error?: string }
   logout: () => void
   deleteProfile: (profileId: string) => void
   resetAllData: (profileId: string) => void
@@ -81,10 +83,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = useCallback((profileId: string, password: string) => {
-    const loggedInProfile = loginProfileRecord(profileId, password)
+  const login = useCallback((name: string, password: string) => {
+    const loggedInProfile = loginProfileRecord(name, password)
     if (!loggedInProfile) {
-      return { ok: false, error: "Sai mật khẩu hoặc profile không tồn tại" }
+      return { ok: false, error: "Sai tên đăng nhập hoặc mật khẩu" }
     }
 
     setProfiles(readProfiles())
@@ -95,6 +97,19 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     logoutProfileRecord()
     setActiveProfileId(null)
+  }, [])
+
+  const resetPassword = useCallback((name: string, newPassword: string) => {
+    try {
+      resetProfilePasswordRecord(name, newPassword)
+      setProfiles(readProfiles())
+      return { ok: true }
+    } catch (error) {
+      return {
+        ok: false,
+        error: error instanceof Error ? error.message : "Không thể đặt lại mật khẩu",
+      }
+    }
   }, [])
 
   const deleteProfile = useCallback((profileId: string) => {
@@ -114,11 +129,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       activeProfile,
       createProfile,
       login,
+      resetPassword,
       logout,
       deleteProfile,
       resetAllData,
     }),
-    [profiles, activeProfile, createProfile, login, logout, deleteProfile, resetAllData],
+    [profiles, activeProfile, createProfile, login, resetPassword, logout, deleteProfile, resetAllData],
   )
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>

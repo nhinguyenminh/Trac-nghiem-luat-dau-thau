@@ -11,7 +11,7 @@ import {
   signUpWithSupabase,
 } from "../services/SupabaseAuthService"
 import { useProfile } from "../contexts/ProfileContext"
-import type { Question, QuestionProgress, UserProfile } from "../types"
+import type { Question, QuestionProgress } from "../types"
 
 function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms <= 0) return "0s"
@@ -22,76 +22,25 @@ function formatDuration(ms: number): string {
   return `${min}m ${remSec}s`
 }
 
-interface ProfileRowProps {
-  profile: UserProfile
-  isActive: boolean
-  onLogin: (profileId: string, password: string) => { ok: boolean; error?: string }
-  onDelete: (profileId: string) => void
-}
-
-function ProfileRow({ profile, isActive, onLogin, onDelete }: ProfileRowProps) {
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">{profile.name}</p>
-          <p className="text-xs text-slate-500">Lần đăng nhập cuối: {new Date(profile.lastLoginAt).toLocaleString("vi-VN")}</p>
-        </div>
-        {isActive && <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">Đang dùng</span>}
-      </div>
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => {
-            setPassword(event.target.value)
-            if (error) setError(null)
-          }}
-          placeholder="Nhập mật khẩu"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        />
-        <button
-          type="button"
-          onClick={() => {
-            const result = onLogin(profile.id, password)
-            if (!result.ok) {
-              setError(result.error ?? "Đăng nhập thất bại")
-              return
-            }
-            setPassword("")
-            setError(null)
-          }}
-          className="inline-flex items-center justify-center gap-1 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
-        >
-          <LogIn className="h-4 w-4" /> Đăng nhập
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(profile.id)}
-          className="inline-flex items-center justify-center gap-1 rounded-lg border border-rose-300 px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
-        >
-          <Trash2 className="h-4 w-4" /> Xóa
-        </button>
-      </div>
-
-      {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
-    </div>
-  )
-}
-
 export default function ProfilePage() {
-  const { profiles, activeProfile, createProfile, login, logout, deleteProfile, resetAllData } = useProfile()
+  const { profiles, activeProfile, createProfile, login, resetPassword, logout, deleteProfile, resetAllData } = useProfile()
   const [questions, setQuestions] = useState<Question[]>([])
   const [progress, setProgress] = useState<QuestionProgress[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [createName, setCreateName] = useState("")
   const [createPassword, setCreatePassword] = useState("")
+  const [createConfirmPassword, setCreateConfirmPassword] = useState("")
   const [createError, setCreateError] = useState<string | null>(null)
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null)
+  const [loginName, setLoginName] = useState("")
+  const [loginPassword, setLoginPassword] = useState("")
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [forgotName, setForgotName] = useState("")
+  const [forgotPassword, setForgotPassword] = useState("")
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState("")
+  const [forgotError, setForgotError] = useState<string | null>(null)
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null)
   const [cloudEmail, setCloudEmail] = useState("")
   const [cloudPassword, setCloudPassword] = useState("")
   const [cloudMessage, setCloudMessage] = useState<string | null>(null)
@@ -334,57 +283,200 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <h2 className="mb-2 text-sm font-semibold text-slate-800">Tạo profile mới</h2>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <input
-              value={createName}
-              onChange={(event) => {
-                setCreateName(event.target.value)
-                if (createError) setCreateError(null)
-              }}
-              placeholder="Tên profile"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-            <input
-              type="password"
-              value={createPassword}
-              onChange={(event) => {
-                setCreatePassword(event.target.value)
-                if (createError) setCreateError(null)
-              }}
-              placeholder="Mật khẩu"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                const result = createProfile(createName, createPassword)
-                if (!result.ok) {
-                  setCreateError(result.error ?? "Không thể tạo profile")
-                  return
-                }
-                setCreateName("")
-                setCreatePassword("")
-                setCreateError(null)
-              }}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
-            >
-              <UserPlus className="h-4 w-4" /> Tạo profile
-            </button>
+        <div className="grid gap-3 lg:grid-cols-3">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <h2 className="mb-2 text-sm font-semibold text-slate-800">Đăng ký</h2>
+            <div className="flex flex-col gap-2">
+              <input
+                value={createName}
+                onChange={(event) => {
+                  setCreateName(event.target.value)
+                  if (createError) setCreateError(null)
+                  if (createSuccess) setCreateSuccess(null)
+                }}
+                placeholder="Tên đăng nhập"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <input
+                type="password"
+                value={createPassword}
+                onChange={(event) => {
+                  setCreatePassword(event.target.value)
+                  if (createError) setCreateError(null)
+                  if (createSuccess) setCreateSuccess(null)
+                }}
+                placeholder="Mật khẩu"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <input
+                type="password"
+                value={createConfirmPassword}
+                onChange={(event) => {
+                  setCreateConfirmPassword(event.target.value)
+                  if (createError) setCreateError(null)
+                  if (createSuccess) setCreateSuccess(null)
+                }}
+                placeholder="Xác nhận mật khẩu"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (createPassword !== createConfirmPassword) {
+                    setCreateError("Mật khẩu xác nhận không khớp")
+                    setCreateSuccess(null)
+                    return
+                  }
+                  const result = createProfile(createName, createPassword)
+                  if (!result.ok) {
+                    setCreateError(result.error ?? "Không thể tạo profile")
+                    setCreateSuccess(null)
+                    return
+                  }
+                  setCreateName("")
+                  setCreatePassword("")
+                  setCreateConfirmPassword("")
+                  setCreateError(null)
+                  setCreateSuccess("Đăng ký thành công")
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+              >
+                <UserPlus className="h-4 w-4" /> Tạo tài khoản
+              </button>
+            </div>
+            {createError && <p className="mt-2 text-xs text-rose-600">{createError}</p>}
+            {createSuccess && <p className="mt-2 text-xs text-emerald-700">{createSuccess}</p>}
           </div>
-          {createError && <p className="mt-2 text-xs text-rose-600">{createError}</p>}
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <h2 className="mb-2 text-sm font-semibold text-slate-800">Đăng nhập</h2>
+            <div className="flex flex-col gap-2">
+              <input
+                value={loginName}
+                onChange={(event) => {
+                  setLoginName(event.target.value)
+                  if (loginError) setLoginError(null)
+                }}
+                placeholder="Tên đăng nhập"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(event) => {
+                  setLoginPassword(event.target.value)
+                  if (loginError) setLoginError(null)
+                }}
+                placeholder="Mật khẩu"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const result = login(loginName, loginPassword)
+                  if (!result.ok) {
+                    setLoginError(result.error ?? "Đăng nhập thất bại")
+                    return
+                  }
+                  setLoginPassword("")
+                  setLoginError(null)
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-ms-blue px-3 py-2 text-sm font-semibold text-white hover:bg-ms-blue-dark"
+              >
+                <LogIn className="h-4 w-4" /> Đăng nhập
+              </button>
+            </div>
+            {loginError && <p className="mt-2 text-xs text-rose-600">{loginError}</p>}
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <h2 className="mb-2 text-sm font-semibold text-slate-800">Quên mật khẩu</h2>
+            <div className="flex flex-col gap-2">
+              <input
+                value={forgotName}
+                onChange={(event) => {
+                  setForgotName(event.target.value)
+                  if (forgotError) setForgotError(null)
+                  if (forgotSuccess) setForgotSuccess(null)
+                }}
+                placeholder="Tên đăng nhập"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <input
+                type="password"
+                value={forgotPassword}
+                onChange={(event) => {
+                  setForgotPassword(event.target.value)
+                  if (forgotError) setForgotError(null)
+                  if (forgotSuccess) setForgotSuccess(null)
+                }}
+                placeholder="Mật khẩu mới"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <input
+                type="password"
+                value={forgotConfirmPassword}
+                onChange={(event) => {
+                  setForgotConfirmPassword(event.target.value)
+                  if (forgotError) setForgotError(null)
+                  if (forgotSuccess) setForgotSuccess(null)
+                }}
+                placeholder="Xác nhận mật khẩu mới"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (forgotPassword !== forgotConfirmPassword) {
+                    setForgotError("Mật khẩu xác nhận không khớp")
+                    setForgotSuccess(null)
+                    return
+                  }
+                  const result = resetPassword(forgotName, forgotPassword)
+                  if (!result.ok) {
+                    setForgotError(result.error ?? "Không thể đặt lại mật khẩu")
+                    setForgotSuccess(null)
+                    return
+                  }
+                  setForgotPassword("")
+                  setForgotConfirmPassword("")
+                  setForgotError(null)
+                  setForgotSuccess("Đặt lại mật khẩu thành công")
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              >
+                Đặt lại mật khẩu
+              </button>
+            </div>
+            {forgotError && <p className="mt-2 text-xs text-rose-600">{forgotError}</p>}
+            {forgotSuccess && <p className="mt-2 text-xs text-emerald-700">{forgotSuccess}</p>}
+          </div>
         </div>
 
         <div className="mt-4 flex flex-col gap-2">
           {profiles.map((profile) => (
-            <ProfileRow
-              key={profile.id}
-              profile={profile}
-              isActive={activeProfile?.id === profile.id}
-              onLogin={login}
-              onDelete={deleteProfile}
-            />
+            <div key={profile.id} className="rounded-xl border border-slate-200 bg-white p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{profile.name}</p>
+                  <p className="text-xs text-slate-500">
+                    Lần đăng nhập cuối: {new Date(profile.lastLoginAt).toLocaleString("vi-VN")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {activeProfile?.id === profile.id && (
+                    <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">Đang dùng</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => deleteProfile(profile.id)}
+                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-rose-300 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+                  >
+                    <Trash2 className="h-4 w-4" /> Xóa
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>
