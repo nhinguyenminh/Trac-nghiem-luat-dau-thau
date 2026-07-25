@@ -23,7 +23,7 @@ function formatDuration(ms: number): string {
 }
 
 export default function ProfilePage() {
-  const { profiles, activeProfile, createProfile, login, resetPassword, logout, deleteProfile, resetAllData } = useProfile()
+  const { profiles, activeProfile, createProfile, login, resetPassword, logout, deleteProfile } = useProfile()
   const [questions, setQuestions] = useState<Question[]>([])
   const [progress, setProgress] = useState<QuestionProgress[]>([])
   const [loading, setLoading] = useState(true)
@@ -266,24 +266,30 @@ export default function ProfilePage() {
         </div>
 
         {activeProfile && (
-          <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-            Đang đăng nhập: <span className="font-semibold">{activeProfile.name}</span>
-            <div className="mt-3">
+          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-200 text-sm font-bold text-emerald-800">
+                  {activeProfile.name.slice(0, 1).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm text-emerald-700">Đang đăng nhập</p>
+                  <p className="text-base font-semibold text-emerald-900">{activeProfile.name}</p>
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={() => {
-                  resetAllData(activeProfile.id)
-                  setProgress([])
-                }}
-                className="inline-flex items-center gap-2 rounded-lg border border-rose-300 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+                onClick={logout}
+                className="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
               >
-                <Trash2 className="h-4 w-4" /> Reset all data
+                <LogOut className="h-4 w-4" /> Đăng xuất
               </button>
             </div>
           </div>
         )}
 
-        <div className="grid gap-3 lg:grid-cols-3">
+        {!activeProfile && (
+          <div className="grid gap-3 lg:grid-cols-3">
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
             <h2 className="mb-2 text-sm font-semibold text-slate-800">Đăng ký</h2>
             <div className="flex flex-col gap-2">
@@ -451,22 +457,20 @@ export default function ProfilePage() {
             {forgotError && <p className="mt-2 text-xs text-rose-600">{forgotError}</p>}
             {forgotSuccess && <p className="mt-2 text-xs text-emerald-700">{forgotSuccess}</p>}
           </div>
-        </div>
+          </div>
+        )}
 
-        <div className="mt-4 flex flex-col gap-2">
-          {profiles.map((profile) => (
-            <div key={profile.id} className="rounded-xl border border-slate-200 bg-white p-3">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{profile.name}</p>
-                  <p className="text-xs text-slate-500">
-                    Lần đăng nhập cuối: {new Date(profile.lastLoginAt).toLocaleString("vi-VN")}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {activeProfile?.id === profile.id && (
-                    <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">Đang dùng</span>
-                  )}
+        {!activeProfile && (
+          <div className="mt-4 flex flex-col gap-2">
+            {profiles.map((profile) => (
+              <div key={profile.id} className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{profile.name}</p>
+                    <p className="text-xs text-slate-500">
+                      Lần đăng nhập cuối: {new Date(profile.lastLoginAt).toLocaleString("vi-VN")}
+                    </p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => deleteProfile(profile.id)}
@@ -476,9 +480,9 @@ export default function ProfilePage() {
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {!activeProfile ? (
