@@ -10,6 +10,8 @@ interface StoredProfiles {
 
 const DEFAULT_PROFILE_NAME = "Hung"
 const DEFAULT_PROFILE_PASSWORD = "aabaab"
+const DEFAULT_PROFILE_ID = "00000000-0000-4000-8000-000000000001"
+const LEGACY_DEFAULT_PROFILE_ID = "seed-hung-profile"
 
 function isUserProfile(value: unknown): value is UserProfile {
   if (typeof value !== "object" || value === null) return false
@@ -34,13 +36,28 @@ function ensureDefaultProfile(profiles: UserProfile[]): UserProfile[] {
   return [
     ...profiles,
     {
-      id: "seed-hung-profile",
+      id: DEFAULT_PROFILE_ID,
       name: DEFAULT_PROFILE_NAME,
       password: DEFAULT_PROFILE_PASSWORD,
       createdAt: now,
       lastLoginAt: now,
     },
   ]
+}
+
+function migrateLegacyDefaultProfileId(profiles: UserProfile[]): { profiles: UserProfile[]; changed: boolean } {
+  let changed = false
+  const migratedProfiles = profiles.map((profile) => {
+    if (profile.id !== LEGACY_DEFAULT_PROFILE_ID) return profile
+    changed = true
+    return { ...profile, id: DEFAULT_PROFILE_ID }
+  })
+
+  if (changed && readActiveProfileId() === LEGACY_DEFAULT_PROFILE_ID) {
+    writeActiveProfileId(DEFAULT_PROFILE_ID)
+  }
+
+  return { profiles: migratedProfiles, changed }
 }
 
 function readStoredProfiles(): StoredProfiles {
@@ -53,8 +70,11 @@ function readStoredProfiles(): StoredProfiles {
     }
     const parsed = JSON.parse(raw) as Partial<StoredProfiles>
     const profiles = Array.isArray(parsed.profiles) ? parsed.profiles.filter(isUserProfile) : []
-    const seeded = ensureDefaultProfile(profiles)
+    const migratedResult = migrateLegacyDefaultProfileId(profiles)
+    const seeded = ensureDefaultProfile(migratedResult.profiles)
     if (seeded.length !== profiles.length) {
+      writeStoredProfiles(seeded)
+    } else if (migratedResult.changed) {
       writeStoredProfiles(seeded)
     }
     return { profiles: seeded }
@@ -84,6 +104,7 @@ export function readProfiles(): UserProfile[] {
 
 export function readActiveProfileId(): string | null {
   const raw = localStorage.getItem(ACTIVE_PROFILE_KEY)
+  if (raw === LEGACY_DEFAULT_PROFILE_ID) return DEFAULT_PROFILE_ID
   return typeof raw === "string" && raw.trim().length > 0 ? raw : null
 }
 
