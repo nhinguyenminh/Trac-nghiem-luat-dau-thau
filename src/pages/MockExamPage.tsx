@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { AlertTriangle, Flag, Loader2 } from "lucide-react"
 import type { Question } from "../types"
 
 const EXAM_QUESTION_COUNT = 70
 const EXAM_DURATION_SECONDS = 60 * 60
 const LETTERS = ["A", "B", "C", "D"]
-const QUESTION_SCROLL_OFFSET = 132
+const QUESTION_SCROLL_EXTRA_GAP = 16
 
 function shuffle<T>(source: T[]): T[] {
   const arr = [...source]
@@ -38,6 +38,7 @@ function computeScore(examQuestions: Question[], selectedAnswers: Record<number,
 }
 
 export default function MockExamPage() {
+  const stickyHeaderRef = useRef<HTMLElement | null>(null)
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
   const [examQuestions, setExamQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
@@ -102,7 +103,8 @@ export default function MockExamPage() {
   const scrollToQuestion = (questionId: number) => {
     const element = document.getElementById(`mock-question-${questionId}`)
     if (!element) return
-    const top = element.getBoundingClientRect().top + window.scrollY - QUESTION_SCROLL_OFFSET
+    const stickyHeaderHeight = stickyHeaderRef.current?.getBoundingClientRect().height ?? 0
+    const top = element.getBoundingClientRect().top + window.scrollY - stickyHeaderHeight - QUESTION_SCROLL_EXTRA_GAP
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
   }
 
@@ -158,7 +160,7 @@ export default function MockExamPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur">
+      <section ref={stickyHeaderRef} className="sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">Thi thử 70 câu</h1>
