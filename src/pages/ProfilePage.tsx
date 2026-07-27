@@ -12,15 +12,8 @@ import {
 } from "../services/SupabaseAuthService"
 import { useProfile } from "../contexts/ProfileContext"
 import type { Question, QuestionProgress } from "../types"
-
-function formatDuration(ms: number): string {
-  if (!Number.isFinite(ms) || ms <= 0) return "0s"
-  const sec = Math.round(ms / 1000)
-  if (sec < 60) return `${sec}s`
-  const min = Math.floor(sec / 60)
-  const remSec = sec % 60
-  return `${min}m ${remSec}s`
-}
+import SUBJECT from "../config/subject"
+import { formatDuration } from "../utils/formatting"
 
 export default function ProfilePage() {
   const { activeProfile, createProfile, login, resetPassword, logout } = useProfile()
@@ -54,7 +47,7 @@ export default function ProfilePage() {
   }, [activeProfile?.id])
 
   useEffect(() => {
-    const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
+    const questionsUrl = `${import.meta.env.BASE_URL}${SUBJECT.questionsFileName}`
     fetch(questionsUrl)
       .then((res) => {
         if (!res.ok) throw new Error("failed")
@@ -71,8 +64,10 @@ export default function ProfilePage() {
   }, [])
 
   const summary = useMemo(() => getProgressSummary(questions, progress), [questions, progress])
-  const baseQuestions = useMemo(() => questions.filter((question) => question.id >= 1 && question.id <= 340), [questions])
-  const supplementQuestions = useMemo(() => questions.filter((question) => question.id >= 341 && question.id <= 390), [questions])
+  const questionGroupData = useMemo(
+    () => SUBJECT.questionGroups.map((group) => ({ ...group, items: questions.filter(group.filter) })),
+    [questions],
+  )
 
   const difficultQuestions = useMemo(() => {
     const progressById = new Map(progress.map((item) => [item.questionId, item]))
@@ -597,21 +592,15 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-slate-800">Bộ chính (STT 1-340)</h3>
-                  <span className="text-xs text-slate-500">{baseQuestions.length} câu</span>
+              {questionGroupData.map((group) => (
+                <div key={group.label}>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-slate-800">{group.label}</h3>
+                    <span className="text-xs text-slate-500">{group.items.length} câu</span>
+                  </div>
+                  {renderQuestionGrid(group.items)}
                 </div>
-                {renderQuestionGrid(baseQuestions)}
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-slate-800">50 câu bổ sung (STT 341-390)</h3>
-                  <span className="text-xs text-slate-500">{supplementQuestions.length} câu</span>
-                </div>
-                {renderQuestionGrid(supplementQuestions)}
-              </div>
+              ))}
             </div>
           </section>
         </>

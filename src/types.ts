@@ -1,4 +1,5 @@
-export type QuestionScope = "all" | "first200" | "after200" | "supplement50"
+/** Scope value — valid values are defined in src/config/subject.ts */
+export type QuestionScope = string
 
 export type PracticeMode = "normal" | "focusWrongAndStale"
 

@@ -6,10 +6,11 @@ import { useSettings } from "../useSettings"
 import StatsPanel from "../components/StatsPanel"
 import { readProgress, updateQuestionProgress, writeProgress } from "../services/ProgressService"
 import { useProfile } from "../contexts/ProfileContext"
-import type { PracticeMode, Question, QuestionProgress, QuestionScope, Stats } from "../types"
-
-const LETTERS = ["A", "B", "C", "D"]
-const AUTO_NEXT_MS = 3000
+import type { Question, QuestionProgress, Stats } from "../types"
+import SUBJECT from "../config/subject"
+import { AUTO_NEXT_MS, LETTERS } from "../utils/constants"
+import { shuffleQuestion, getQuestionCategories, getFilteredQuestions } from "../utils/questionUtils"
+import { buildQuestionQueue } from "../utils/queueBuilder"
 
 interface QuizPageProps {
   practiceQuestionId?: number
@@ -27,194 +28,6 @@ interface StoredAttempt {
 }
 
 const emptySessionStats: Stats = { total: 0, correct: 0, wrong: 0 }
-
-function normalizeText(value: string): string {
-  return String(value ?? "")
-    .replace(/\s+/g, " ")
-    .toLowerCase()
-    .trim()
-}
-
-function shouldShuffleOptions(question: Question): boolean {
-  const text = normalizeText(`${question.question} ${question.options.join(" ")}`)
-  const answerText = normalizeText(question.options[question.answer] ?? "")
-  const haystack = `${text} ${answerText}`
-
-  const shouldKeepOriginalOrder =
-    /đều\s+(đúng|sai)/.test(haystack) ||
-    /là\s+(đúng|sai)/.test(haystack) ||
-    /\b(đáp\s+án|phương\s+án|các\s+phương\s+án|tất\s+cả\s+phương\s+án|tất\s+cả\s+các\s+phương\s+án)\b[^\n]*\b(và|,|\/)\b/.test(haystack) ||
-    /tất\s+cả\s+(các\s+)?phương\s+án/.test(haystack) ||
-    /mọi\s+phương\s+án/.test(haystack) ||
-    /phương\s+án\s+trên/.test(haystack) ||
-    /cả\s+\d+\s+phương\s+án/.test(haystack)
-
-  return !shouldKeepOriginalOrder
-}
-
-function getQuestionsForScope(questions: Question[], scope: QuestionScope): Question[] {
-  const sorted = [...questions].sort((a, b) => a.id - b.id)
-  const baseQuestions = sorted.filter((question) => question.id <= 390)
-
-  if (scope === "first200") return baseQuestions.slice(0, 200)
-  if (scope === "after200") return baseQuestions.slice(200)
-  if (scope === "supplement50") return baseQuestions.slice(340, 390)
-  return baseQuestions
-}
-
-function getQuestionsForCategories(questions: Question[], selectedCategories: string[]): Question[] {
-  if (selectedCategories.length === 0) return questions
-  return questions.filter((question) => {
-    const category = (question.category ?? "").trim()
-    return selectedCategories.includes(category)
-  })
-}
-
-function getFilteredQuestions(questions: Question[], scope: QuestionScope, selectedCategories: string[]): Question[] {
-  const scopedQuestions = getQuestionsForScope(questions, scope)
-  return getQuestionsForCategories(scopedQuestions, selectedCategories)
-}
-
-function getQuestionCategories(questions: Question[]): string[] {
-  return Array.from(new Set(questions.map((question) => (question.category ?? "").trim()).filter(Boolean))).sort()
-}
-
-function shuffleQuestion(question: Question): Question {
-  if (!shouldShuffleOptions(question)) {
-    return {
-      ...question,
-      answer: question.answer,
-      optionOrder: [...Array(question.options.length).keys()],
-    }
-  }
-
-  const optionOrder = [...Array(question.options.length).keys()]
-  for (let i = optionOrder.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[optionOrder[i], optionOrder[j]] = [optionOrder[j], optionOrder[i]]
-  }
-
-  return {
-    ...question,
-    options: optionOrder.map((index) => question.options[index]),
-    answer: optionOrder.indexOf(question.answer),
-    optionOrder,
-  }
-}
-
-function shuffleQuestions(sourceQuestions: Question[]): Question[] {
-  const queue = [...sourceQuestions]
-  for (let i = queue.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[queue[i], queue[j]] = [queue[j], queue[i]]
-  }
-
-  return queue
-}
-
-function getQuestionAttemptCount(progress: QuestionProgress | undefined): number {
-  if (!progress) return 0
-  return progress.correctCount + progress.wrongCount
-}
-
-function getQuestionLastUpdatedTime(progress: QuestionProgress | undefined): number {
-  return progress?.lastUpdated?.getTime() ?? 0
-}
-
-function ensureFirstQuestionNotRepeated(queue: Question[], previousQuestionId?: number): Question[] {
-  if (previousQuestionId == null || queue.length <= 1) return queue
-
-  const firstDifferentIndex = queue.findIndex((question) => question.id !== previousQuestionId)
-  if (firstDifferentIndex <= 0) return queue
-
-  const [firstDifferentQuestion] = queue.splice(firstDifferentIndex, 1)
-  queue.unshift(firstDifferentQuestion)
-  return queue
-}
-
-function buildNormalQuestionQueue(sourceQuestions: Question[], previousQuestionId?: number): Question[] {
-  const queue = shuffleQuestions(sourceQuestions)
-  return ensureFirstQuestionNotRepeated(queue, previousQuestionId)
-}
-
-function interleavePriorityBuckets(priorityBuckets: Question[][], pickOrder: number[]): Question[] {
-  const queues = priorityBuckets.map((bucket) => [...bucket])
-  const merged: Question[] = []
-
-  while (queues.some((bucket) => bucket.length > 0)) {
-    let addedInCycle = false
-
-    for (const bucketIndex of pickOrder) {
-      const nextQuestion = queues[bucketIndex]?.shift()
-      if (!nextQuestion) continue
-
-      merged.push(nextQuestion)
-      addedInCycle = true
-    }
-
-    if (!addedInCycle) break
-  }
-
-  return merged
-}
-
-function buildFocusQuestionQueue(
-  sourceQuestions: Question[],
-  progressMap: Map<number, QuestionProgress>,
-  previousQuestionId?: number,
-): Question[] {
-  const wrongQuestions: Question[] = []
-  const unseenQuestions: Question[] = []
-  const reviewedQuestions: Question[] = []
-
-  for (const question of sourceQuestions) {
-    const questionProgress = progressMap.get(question.id)
-    const attempts = getQuestionAttemptCount(questionProgress)
-
-    if (questionProgress?.status === "wrong") {
-      wrongQuestions.push(question)
-      continue
-    }
-
-    if (attempts === 0) {
-      unseenQuestions.push(question)
-      continue
-    }
-
-    reviewedQuestions.push(question)
-  }
-
-  const staleQuestions = [...reviewedQuestions].sort((a, b) => {
-    const lastUpdatedDiff = getQuestionLastUpdatedTime(progressMap.get(a.id)) - getQuestionLastUpdatedTime(progressMap.get(b.id))
-    if (lastUpdatedDiff !== 0) return lastUpdatedDiff
-
-    const aAttempts = getQuestionAttemptCount(progressMap.get(a.id))
-    const bAttempts = getQuestionAttemptCount(progressMap.get(b.id))
-    if (aAttempts !== bAttempts) return aAttempts - bAttempts
-
-    return Math.random() - 0.5
-  })
-
-  const queue = interleavePriorityBuckets(
-    [shuffleQuestions(wrongQuestions), shuffleQuestions(unseenQuestions), staleQuestions],
-    [0, 1, 0, 2],
-  )
-
-  return ensureFirstQuestionNotRepeated(queue, previousQuestionId)
-}
-
-function buildQuestionQueue(
-  sourceQuestions: Question[],
-  progressMap: Map<number, QuestionProgress>,
-  practiceMode: PracticeMode,
-  previousQuestionId?: number,
-): Question[] {
-  if (practiceMode === "normal") {
-    return buildNormalQuestionQueue(sourceQuestions, previousQuestionId)
-  }
-
-  return buildFocusQuestionQueue(sourceQuestions, progressMap, previousQuestionId)
-}
 
 function readStoredAttempts(storageKey: string | null): StoredAttempt[] {
   if (!storageKey) return []
@@ -318,7 +131,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
 
   const applyQuestionSelection = useCallback(
     (rawQuestions: Question[], shouldResetHistory = true) => {
-      const filteredQuestions = getFilteredQuestions(rawQuestions, settings.questionScope, settings.selectedCategories)
+      const filteredQuestions = getFilteredQuestions(rawQuestions, settings.questionScope, settings.selectedCategories, SUBJECT.scopes)
       setAllQuestions(rawQuestions)
       setQuestions(filteredQuestions)
 
@@ -365,7 +178,7 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
   useEffect(() => {
     setProgress(readProgress(profileId))
     setSessionStats(emptySessionStats)
-    const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
+    const questionsUrl = `${import.meta.env.BASE_URL}${SUBJECT.questionsFileName}`
     fetch(questionsUrl)
       .then((res) => {
         if (!res.ok) throw new Error("failed")
@@ -536,46 +349,18 @@ export default function QuizPage({ practiceQuestionId }: QuizPageProps) {
             <div id="settings" className="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
               <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
                 <span className="font-medium text-slate-700">Ôn:</span>
-                <label className="flex items-center gap-1">
-                  <input
-                    type="radio"
-                    name="questionScope"
-                    checked={settings.questionScope === "all"}
-                    onChange={() => setValue("questionScope", "all")}
-                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
-                  />
-                  Tất cả
-                </label>
-                <label className="flex items-center gap-1">
-                  <input
-                    type="radio"
-                    name="questionScope"
-                    checked={settings.questionScope === "first200"}
-                    onChange={() => setValue("questionScope", "first200")}
-                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
-                  />
-                  200 câu đầu (bộ 390)
-                </label>
-                <label className="flex items-center gap-1">
-                  <input
-                    type="radio"
-                    name="questionScope"
-                    checked={settings.questionScope === "after200"}
-                    onChange={() => setValue("questionScope", "after200")}
-                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
-                  />
-                  200 câu sau (bộ 390)
-                </label>
-                <label className="flex items-center gap-1">
-                  <input
-                    type="radio"
-                    name="questionScope"
-                    checked={settings.questionScope === "supplement50"}
-                    onChange={() => setValue("questionScope", "supplement50")}
-                    className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
-                  />
-                  50 câu bổ sung (STT 341-390)
-                </label>
+                {SUBJECT.scopes.map((scope) => (
+                  <label key={scope.value} className="flex items-center gap-1">
+                    <input
+                      type="radio"
+                      name="questionScope"
+                      checked={settings.questionScope === scope.value}
+                      onChange={() => setValue("questionScope", scope.value)}
+                      className="h-4 w-4 border-slate-300 text-ms-blue focus:ring-ms-blue"
+                    />
+                    {scope.label}
+                  </label>
+                ))}
               </div>
 
               <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700">

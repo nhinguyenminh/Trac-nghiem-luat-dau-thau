@@ -5,6 +5,7 @@ import { useStats } from "../useStats"
 import StatsPanel from "../components/StatsPanel"
 import type { Question } from "../types"
 import { useProfile } from "../contexts/ProfileContext"
+import SUBJECT from "../config/subject"
 
 function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
@@ -24,7 +25,7 @@ export default function HomePage() {
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
-    const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
+    const questionsUrl = `${import.meta.env.BASE_URL}${SUBJECT.questionsFileName}`
     fetch(questionsUrl)
       .then((res) => res.json())
       .then((data: Question[]) => setCount(data.length))
@@ -34,9 +35,9 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-8">
       <section className="rounded-2xl bg-ms-blue px-6 py-10 text-center text-white shadow-md">
-        <h1 className="text-balance text-2xl font-bold sm:text-3xl">Luyện thi chứng chỉ đấu thầu</h1>
+        <h1 className="text-balance text-2xl font-bold sm:text-3xl">{SUBJECT.heroTitle}</h1>
         <p className="mx-auto mt-2 max-w-md text-pretty text-sm text-white/90 sm:text-base">
-          Ôn tập với câu hỏi ngẫu nhiên, xem đáp án đúng ngay lập tức và theo dõi tiến độ của bạn.
+          {SUBJECT.heroSubtitle}
         </p>
         <Link
           to="/quiz"
@@ -50,7 +51,7 @@ export default function HomePage() {
           className="mt-3 inline-flex items-center gap-2 rounded-lg border border-white/40 bg-transparent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
         >
           <Play className="h-4 w-4" fill="currentColor" />
-          Vào thi thử 70 câu
+          Vào thi thử {SUBJECT.exam.questionCount} câu
         </Link>
         {count !== null && (
           <p className="mt-3 text-xs text-white/80">Ngân hàng câu hỏi: {count} câu</p>

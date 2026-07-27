@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import type { PracticeMode, QuestionScope } from "./types"
 import { notifyLocalDataChanged } from "./services/CloudSyncService"
+import SUBJECT from "./config/subject"
 
 export interface Settings {
   autoNext: boolean
@@ -17,7 +18,7 @@ const defaultSettings: Settings = {
   autoNext: true,
   showNextButton: true,
   allowRepeat: true,
-  questionScope: "all",
+  questionScope: SUBJECT.defaultScope,
   practiceMode: "normal",
   selectedCategories: [],
 }
@@ -40,10 +41,9 @@ function readSettings(profileId: string | null): Settings {
       autoNext: typeof parsed.autoNext === "boolean" ? parsed.autoNext : defaultSettings.autoNext,
       showNextButton: typeof parsed.showNextButton === "boolean" ? parsed.showNextButton : defaultSettings.showNextButton,
       allowRepeat: typeof parsed.allowRepeat === "boolean" ? parsed.allowRepeat : defaultSettings.allowRepeat,
-      questionScope:
-        parsed.questionScope === "first200" || parsed.questionScope === "after200" || parsed.questionScope === "supplement50"
-          ? parsed.questionScope
-          : defaultSettings.questionScope,
+      questionScope: SUBJECT.scopes.some((s) => s.value === parsed.questionScope)
+        ? (parsed.questionScope as QuestionScope)
+        : defaultSettings.questionScope,
       practiceMode: parsed.practiceMode === "focusWrongAndStale" ? parsed.practiceMode : defaultSettings.practiceMode,
       selectedCategories,
     }

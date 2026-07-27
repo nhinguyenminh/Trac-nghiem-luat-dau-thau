@@ -7,6 +7,7 @@ import PracticePage from "./pages/PracticePage"
 import QuizPage from "./pages/QuizPage"
 import MockExamPage from "./pages/MockExamPage"
 import { getCloudSyncDebugStatus } from "./services/CloudSyncService"
+import SUBJECT from "./config/subject"
 
 function Header() {
   const { pathname } = useLocation()
@@ -15,7 +16,7 @@ function Header() {
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2 font-semibold">
           <GraduationCap className="h-6 w-6" strokeWidth={2} />
-          <span className="text-base sm:text-lg">Luyện Thi Chứng Chỉ Đấu Thầu</span>
+          <span className="text-base sm:text-lg">{SUBJECT.headerTitle}</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link
@@ -80,7 +81,7 @@ export default function App() {
         </Routes>
       </main>
       <footer className="border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        <div>Ứng dụng luyện thi chứng chỉ đấu thầu &middot; Làm bài không giới hạn</div>
+        <div>{SUBJECT.footerText}</div>
         <div className="mt-1">
           Cloud sync: {cloudStatus.enabled ? "ON" : "OFF"}
           {` (hasUrl=${cloudStatus.hasUrl ? "yes" : "no"}, hasAnonKey=${cloudStatus.hasAnonKey ? "yes" : "no"}, hasAuth=${cloudStatus.hasAuthSession ? "yes" : "no"})`}

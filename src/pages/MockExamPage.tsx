@@ -1,41 +1,14 @@
 import { useEffect, useMemo, useState } from "react"
 import { AlertTriangle, Flag, Loader2 } from "lucide-react"
 import type { Question } from "../types"
+import SUBJECT from "../config/subject"
+import { shuffleArray } from "../utils/questionUtils"
+import { formatTime } from "../utils/formatting"
+import { computeScore } from "../utils/examUtils"
+import { LETTERS } from "../utils/constants"
 
-const EXAM_QUESTION_COUNT = 70
-const EXAM_DURATION_SECONDS = 60 * 60
-const LETTERS = ["A", "B", "C", "D"]
+const { exam: EXAM } = SUBJECT
 const QUESTION_SCROLL_OFFSET = 88
-
-function shuffle<T>(source: T[]): T[] {
-  const arr = [...source]
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[arr[i], arr[j]] = [arr[j], arr[i]]
-  }
-  return arr
-}
-
-function formatTime(totalSeconds: number): string {
-  const safeSeconds = Math.max(0, totalSeconds)
-  const h = Math.floor(safeSeconds / 3600)
-  const m = Math.floor((safeSeconds % 3600) / 60)
-  const s = safeSeconds % 60
-
-  const hh = String(h).padStart(2, "0")
-  const mm = String(m).padStart(2, "0")
-  const ss = String(s).padStart(2, "0")
-  return `${hh}:${mm}:${ss}`
-}
-
-function computeScore(examQuestions: Question[], selectedAnswers: Record<number, number | null>): number {
-  if (examQuestions.length === 0) return 0
-  const correctCount = examQuestions.reduce((count, question) => {
-    return count + (selectedAnswers[question.id] === question.answer ? 1 : 0)
-  }, 0)
-
-  return Math.round((correctCount / examQuestions.length) * 100)
-}
 
 export default function MockExamPage() {
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
@@ -46,20 +19,20 @@ export default function MockExamPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [showReviewResult, setShowReviewResult] = useState(false)
   const [focusedQuestionId, setFocusedQuestionId] = useState<number | null>(null)
-  const [timeLeftSeconds, setTimeLeftSeconds] = useState(EXAM_DURATION_SECONDS)
+  const [timeLeftSeconds, setTimeLeftSeconds] = useState(EXAM.durationSeconds)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number | null>>({})
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
-    const questionsUrl = `${import.meta.env.BASE_URL}questions.json`
+    const questionsUrl = `${import.meta.env.BASE_URL}${SUBJECT.questionsFileName}`
     fetch(questionsUrl)
       .then((res) => {
         if (!res.ok) throw new Error("failed")
         return res.json()
       })
       .then((data: Question[]) => {
-        const pool = data.filter((q) => q.id >= 1 && q.id <= 390)
-        const selected = shuffle(pool).slice(0, EXAM_QUESTION_COUNT)
+        const pool = data.filter(EXAM.poolFilter)
+        const selected = shuffleArray(pool).slice(0, EXAM.questionCount)
         setAllQuestions(pool)
         setExamQuestions(selected)
         const initialAnswers: Record<number, number | null> = {}
@@ -105,13 +78,14 @@ export default function MockExamPage() {
   }
 
   const handleStart = () => {
-    const confirmed = window.confirm("Bài thi thử gồm 70 câu trong 60 phút. Bạn có chắc muốn bắt đầu?")
+    const durationMinutes = Math.round(EXAM.durationSeconds / 60)
+    const confirmed = window.confirm(`Bài thi thử gồm ${EXAM.questionCount} câu trong ${durationMinutes} phút. Bạn có chắc muốn bắt đầu?`)
     if (!confirmed) return
     setHasStarted(true)
     setIsSubmitted(false)
     setShowReviewResult(false)
     setFocusedQuestionId(examQuestions[0]?.id ?? null)
-    setTimeLeftSeconds(EXAM_DURATION_SECONDS)
+    setTimeLeftSeconds(EXAM.durationSeconds)
   }
 
   const handleSubmit = () => {
@@ -122,7 +96,7 @@ export default function MockExamPage() {
   }
 
   const handleRestart = () => {
-    const selected = shuffle(allQuestions).slice(0, EXAM_QUESTION_COUNT)
+    const selected = shuffleArray(allQuestions).slice(0, EXAM.questionCount)
     setExamQuestions(selected)
     const initialAnswers: Record<number, number | null> = {}
     const initialFlags: Record<number, boolean> = {}
@@ -133,7 +107,7 @@ export default function MockExamPage() {
     setSelectedAnswers(initialAnswers)
     setFlaggedQuestions(initialFlags)
     setFocusedQuestionId(selected[0]?.id ?? null)
-    setTimeLeftSeconds(EXAM_DURATION_SECONDS)
+    setTimeLeftSeconds(EXAM.durationSeconds)
     setHasStarted(false)
     setIsSubmitted(false)
     setShowReviewResult(false)
@@ -166,8 +140,8 @@ export default function MockExamPage() {
             Câu hỏi sẽ chỉ hiển thị sau khi bạn bấm xác nhận bắt đầu làm bài.
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-slate-600">
-            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">70 câu</span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">60 phút</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">{EXAM.questionCount} câu</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">{Math.round(EXAM.durationSeconds / 60)} phút</span>
             <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">Thang điểm 100</span>
           </div>
           <button
